@@ -1,0 +1,11 @@
+# For Macs
+.DS_Store
+
+# For java
+*.class
+hs_err_pid*
+
+# For IntelliJ IDEA
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+Kirrkirr.iws
