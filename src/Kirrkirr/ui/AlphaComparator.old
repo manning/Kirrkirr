@@ -1,0 +1,21 @@
+package Kirrkirr;
+
+import java.io.Serializable;
+
+/** This little class does regular alphabetical ordering (for glosses - use
+ *  KAlphaComparator for headwords), which knows to ignore case.  
+ *  It's been put in its own class because it is used
+ *  in several places.  Note that the Comparator used is our own (package
+ *  Kirrkirr) for JDK1.1 compatibility.
+ */
+class AlphaComparator implements Comparator, Serializable {
+    public int compare(Object a, Object b)
+    {
+	return (((String) a).toLowerCase()).compareTo(((String) b).toLowerCase());
+    }
+	    
+    public boolean equals(Object a, Object b)
+    {
+	return (((String) a).toLowerCase()).equals(((String) b).toLowerCase());
+    }
+}
