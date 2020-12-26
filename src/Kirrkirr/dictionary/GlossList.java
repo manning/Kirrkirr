@@ -39,7 +39,7 @@ public class GlossList extends WordList {
 	      time=System.currentTimeMillis()-time;
 	      Dbg.print(items.length+" items: "+time+" ms to sort");
 	      }*/
-	  words = new KKListModel<>(v);
+	  words = new KKListModel<String>(v);
 	  words.trimToSize();
 	  if (Dbg.GLOSSES) {
 	      Dbg.print("Gloss glosses words has " + words.size() +
@@ -63,6 +63,7 @@ public class GlossList extends WordList {
 	  scrollPanel.mainwords.removeElement(word);
       }
 
+      @Override
       public String getFuzzy(String word) {
 	  return SearchPanel.glossFuzzy(word);
       }
@@ -81,10 +82,12 @@ public class GlossList extends WordList {
 	      return v;*/
       }
 
+      @Override
       protected void setWord(String word) {
 	  this.parent.setCurrentWord(word,true,jWords,Kirrkirr.SCROLLPANEL,1);
       }
 
+      @Override
       public void refreshWords(int attributeChanged) {
 	  /*if (attributeChanged==SEE_SUB){
 	      if (!attributes[SEE_SUB]){
@@ -106,6 +109,7 @@ public class GlossList extends WordList {
 	  jWords.repaint();
       }
 
+      @Override
       protected void initAttributes() {
 	  attributes = new boolean[ScrollPanel.ENGLISH_ATTRIBUTES];
 	  attributes[ScrollPanel.SEE_SUB]=true;

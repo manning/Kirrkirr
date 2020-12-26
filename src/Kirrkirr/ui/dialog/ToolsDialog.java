@@ -13,7 +13,7 @@ import javax.swing.*;
 import java.util.*;
 import java.io.*;
 
-/** The <code>ToolsDialog</code> object provides a dialog for various
+/** The {@code ToolsDialog} object provides a dialog for various
  *  Kirrkirr tools that deal with external files and other functionality
  *  that is not part of the dictionary and ui itself but is critical to
  *  its operation.  The initial motivation for this dialog is a dialog
@@ -270,7 +270,9 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
     }
 
     //getters for sizing info
+    @Override
     public Dimension getMinimumSize() { return minimumSize; }
+    @Override
     public Dimension getPreferredSize() { return minimumSize; }
 
     /** How to respond to button clicks - if run, then run.  If
@@ -294,6 +296,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
      * @param file The file containing the properties
      * @return The return value is always true and has no meaning
      */
+    @Override
     public boolean accept(File file) {
         propFile = file.getName();
         if (propFile != null && ! propFile.equalsIgnoreCase("")) {
@@ -323,11 +326,11 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
      * specified through the class variable propFile (ouch!).
      */
     private void fillInFields(String parent) {
-    	if (propFile == null) return;
-    	Properties selectedProps = new Properties();
+    	if (propFile == null) { return; }
 
-    	try {
+        try {
             BufferedInputStream bis = new BufferedInputStream(RelFile.makeURL(parent, propFile).openConnection().getInputStream());
+            Properties selectedProps = new Properties();
             PropertiesUtils.load(selectedProps, bis);
             bis.close();
 
@@ -505,7 +508,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
 
     /** Bring up a dialog box explaining the input that must be entered.
      */
-    private void popupNeedInputDialog(String inputName) {
+    private static void popupNeedInputDialog(String inputName) {
         new NeedInputDialog(Kirrkirr.window, inputName);
     }
 
@@ -561,8 +564,8 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
      */
     static class ToolsDialogCheckBox extends JComponent implements ActionListener {
 
-        private JCheckBox checkBox; //the actual control
-        private AuxFilePanel associatedPanel; //panel to enable/disable on select/deselect
+        private final JCheckBox checkBox; //the actual control
+        private final AuxFilePanel associatedPanel; //panel to enable/disable on select/deselect
 
         public ToolsDialogCheckBox(String text, AuxFilePanel assocPanel) {
             setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -581,6 +584,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         /** When toggled on and off, we simply set our associated
          * AuxFilePanel's enabled bit to our selected status
          */
+        @Override
         public void actionPerformed(ActionEvent e) {
             associatedPanel.setEnabled(checkBox.isSelected());
         }
@@ -600,16 +604,15 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
      *  the IndexMaker's progress.
      *
      */
-    public static class IndexProgressDialog extends JDialog implements IndexMakerTracker
-    {
+    public static class IndexProgressDialog extends JDialog implements IndexMakerTracker {
         private boolean doFwd, doRev, doDom; //whether each type of file
                                              //is being built
         private boolean doneDispose; //=false;
 
         private int stages, curStage;  //number of passes to complete
 
-        private JLabel stageName;
-        private JProgressBar progressBar;
+        private final JLabel stageName;
+        private final JProgressBar progressBar;
 
         private static final String SC_INDEX_PROG = "Index Maker progress";
 
@@ -667,14 +670,17 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         /* For the IndexMakerTracker interface
          *
          */
+        @Override
         public void totalStepsForPass(int nSteps) {
             progressBar.setMaximum(nSteps);
         }
 
+        @Override
         public void stepsDone(int nStepsDone) {
             progressBar.setValue(nStepsDone);
         }
 
+        @Override
         public void passDone() {
             ++curStage;  //move to next Stage
 
@@ -696,6 +702,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
             }
         }
 
+        @Override
         public void maybeDispose() {
             if (!doneDispose) {
                 dispose(); //all done

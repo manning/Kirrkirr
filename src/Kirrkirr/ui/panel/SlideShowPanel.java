@@ -50,7 +50,7 @@ public class SlideShowPanel extends JPanel implements ActionListener {
 
         this.defaultPic = defaultPic;
         this.callback = callback;
-        currentImages = new Vector<>();
+        currentImages = new Vector<String>();
 
         initViewer();
 

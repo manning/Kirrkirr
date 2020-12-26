@@ -202,7 +202,7 @@ public class IndexMaker {
         String entryTag = dictinfo.getEntryTag();
         Regex startentryreg = OroRegex.newRegex("<"+entryTag+"(?: [^>]*)?>");
         Dbg.print("getFilePositions: entry regex is " + startentryreg);
-        fpos = new Vector<>(9000, 1000);
+        fpos = new Vector<Long>(9000, 1000);
         int success = readFilePositions(fpos, dictFilename, startentryreg,
                                       progressTracker);
         if (Dbg.INDEX && success < 40) {
@@ -353,8 +353,8 @@ public class IndexMaker {
         numgli = 0;
         totalgli = 0;
         try {
-            index = new Hashtable<>(12000);
-            headWords = new Vector<>(9000, 1000);
+            index = new Hashtable<String, Object>(12000);
+            headWords = new Vector<String>(9000, 1000);
 	    // Vector noGloss = new Vector();
             //String glossXPath=dictinfo.getBidirectionalXPath();
 	    String glossXPath=dictinfo.getGlossXPath();
@@ -633,7 +633,7 @@ public class IndexMaker {
         if (endWord == -1) {
             return null;
         }
-        Vector<String> glossWords = new Vector<>();
+        Vector<String> glossWords = new Vector<String>();
         String word = gloss.substring(startWord,endWord);
         while (word != null) {
             addWord(word, glossWords, stopchars);
@@ -803,8 +803,8 @@ public class IndexMaker {
                                           String clkfilename,
                                           IndexMakerTracker progressTracker) throws Exception {
         int numEntries = fpos.size();
-        index = new Hashtable<>(numEntries);
-        headWords = new Vector<>(numEntries, 200);
+        index = new Hashtable<String, Object>(numEntries);
+        headWords = new Vector<String>(numEntries, 200);
 
         String headwordXPath=dictinfo.getHeadwordXPath();
         String freqXPath=dictinfo.getFrequencyXPath();
@@ -1344,7 +1344,7 @@ public class IndexMaker {
 
     private static Vector<Node> getWordSenses(Document doc, String senseXPath) {
         //gather additional senses
-        Vector<Node> senseVec = new Vector<>();
+        Vector<Node> senseVec = new Vector<Node>();
         senseVec.addElement(doc.getFirstChild()); //add primary sense node
         NodeList senses = getNodeListFromRoot((Element) doc.getFirstChild(), senseXPath);
         if (senses != null) {
@@ -1534,7 +1534,7 @@ public class IndexMaker {
          */
         public TreeNode(String tag) {
             name = tag;
-            children = new Vector<>();
+            children = new Vector<TreeNode>();
         }
 
         /** Searches for a domain by the given name at the current

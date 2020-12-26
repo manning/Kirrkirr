@@ -13,13 +13,13 @@ public class FontProvider {
     private static final String SERIF = "Serif";
     private static final String DIALOG = "Dialog";
 
-    public static final int SMALL_TEXT_SIZE = 10;
-    public static final int WORD_LIST_FONT_SIZE = 12;
-    public static final int REGULAR_TEXT_SIZE = 12;
-    public static final int LARGE_TEXT_SIZE = 14;
-    public static final int VERY_LARGE_TEXT_SIZE = 16;
-    public static final int HUGE_TEXT_SIZE = 18;
-    public static final int GIGANTIC_TEXT_SIZE = 24;
+    private static final int SMALL_TEXT_SIZE = 10;
+    private static final int WORD_LIST_FONT_SIZE = 12;
+    private static final int REGULAR_TEXT_SIZE = 12;
+    private static final int LARGE_TEXT_SIZE = 14;
+    private static final int VERY_LARGE_TEXT_SIZE = 16;
+    private static final int HUGE_TEXT_SIZE = 18;
+    private static final int GIGANTIC_TEXT_SIZE = 24;
 
     public static Font SMALL_WORD_FONT;
     public static Font WORD_LIST_FONT;
@@ -113,7 +113,7 @@ public class FontProvider {
         VERY_LARGE_ITALIC_TEXT_FONT = new Font(str, Font.ITALIC, VERY_LARGE_TEXT_SIZE);
 
         String str2 = pr.getProperty("dictionary.defaultHtmlFont");
-        if (str2 == null || "".equals(str2)) {
+        if (isEmpty(str2)) {
             str2 = str;
         }
         // Doing this would only be effective if we also redefined H1, H2, etc.'s size in CSS.
@@ -143,7 +143,7 @@ public class FontProvider {
 
 
     private static boolean isEmpty(String prop) {
-        return prop == null || "".equals(prop);
+        return prop == null || prop.isEmpty();
     }
 
 }

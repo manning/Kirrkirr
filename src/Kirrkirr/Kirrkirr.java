@@ -1,3 +1,30 @@
+package Kirrkirr;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import Kirrkirr.util.*;
+import Kirrkirr.ui.*;
+import Kirrkirr.ui.data.*;
+import Kirrkirr.ui.dialog.*;
+import Kirrkirr.ui.panel.*;
+import Kirrkirr.ui.panel.optionPanel.*;
+import Kirrkirr.dictionary.*;
+import java.io.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.datatransfer.*;
+import java.util.*;
+import java.net.*;
+
+import javax.swing.*;
+import javax.swing.event.*;
+
+// added by Jessica Halida
+// the following library is added to support the new help button
+import javax.help.*;
+
+
 /** Kirrkirr is an interactive multimedia browsing
  *  environment for dictionaries (particularly targeted at indigenous
  *  languages).
@@ -15,7 +42,7 @@
  *  Version 3 releases code (c) 2001, 2002
  *  Christopher Manning, Kristen Parton, Kevin Lim
  *
- *  Version 4 release code (c) 2003, 2004, 2005
+ *  Version 4 release code (c) 2003, 2004, 2005, 2007
  *  Christopher Manning, Chloe Kiddon
  *
  *  java Kirrkirr.Kirrkirr
@@ -23,33 +50,8 @@
  *  Older versions were:
  *  Wrl.xml Wrl.clk
  *  appletviewer -J-Djava.security.policy=file:/C:/tmp/kirrkirr/kirrkirr.policy file:/C:/UNIV/kirr2/applet.html
- */
-package Kirrkirr;
-
-import Kirrkirr.util.*;
-import Kirrkirr.ui.*;
-import Kirrkirr.ui.data.*;
-import Kirrkirr.ui.dialog.*;
-import Kirrkirr.ui.panel.*;
-import Kirrkirr.ui.panel.optionPanel.*;
-import Kirrkirr.dictionary.*;
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.datatransfer.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.Method;
-
-import javax.swing.*;
-import javax.swing.event.*;
-
-// added by Jessica Halida
-// the following library is added to support the new help button
-import javax.help.*;
-
-
-/** The main class for the graphical interface Kirrkirr.  A main method
+ *
+ * The main class for the graphical interface Kirrkirr.  A main method
  *  is included in this class.  Many variables in it are static --
  *  it isn't built to handle multiple Kirrkirrs running.
  *
@@ -72,6 +74,8 @@ public class Kirrkirr extends JPanel
     public static final String xslFolder = "xsl";
     /** the name of the folder for cached html files */
     public static final String htmlFolder = "html";
+    /** the name of the folder for help */
+    public static final String helpFolder = "Help/HTML";
     public static final String usersFolder = "users";
     // public static final String tutorFolder = "tutor";
     public static final String imagesFolder="images";
@@ -197,12 +201,12 @@ public class Kirrkirr extends JPanel
     /////
     /** to call help.html and about.html*/
     public static final String HELP_FILE_END = ".html";
-    /** private static final String help_main = "help.html";*/
+    private static final String help_main = "help.html";
     private static final String help_about = "about.html";
-    /** define helpSet for Java Help File */
+    // /** define helpSet for Java Help File */
     //    protected static HelpSet m_hs;
     /** define Broker and the location of HelpSet file is in Help folder*/
-    private static HelpBroker helpBroker;
+    // private static HelpBroker helpBroker;
     private static final String HELPSETNAME = "Help/Kirrkirr.hs";
 
     /////
@@ -227,8 +231,8 @@ public class Kirrkirr extends JPanel
     public static Kirrkirr kk;
     public static JFrame window;
 
-    /** Use setStatusBar(String) to access it */
-    /** cw '02: and occasionally setStatusBarIconText(String)... */
+    /** Use setStatusBar(String) to access it.
+     *  cw '02: and occasionally setStatusBarIconText(String)... */
     private static StatusBar statusBar;
 
     //for the progress bar:
@@ -263,7 +267,7 @@ public class Kirrkirr extends JPanel
                          //keep track of current tab to notify when deselected
 
     /* the top searchBox */
-    private OneBoxPanel obp;
+    private final OneBoxPanel obp;
     public static JSplitPane centreSplit;
 
     public static final Color toolbarColor = (new Color(250, 220, 100)).darker();
@@ -326,6 +330,7 @@ public class Kirrkirr extends JPanel
     private static final int REGULARWIDTH = 800;
     private static final int REGULARMACWIDTH = 1024;
     private static final int LARGE_HEIGHT = 1024;
+    private static final int HUGE_WIDTH = 1600;
     // you seem to have to delete this much height on Windows.  Really.
     private static final int ALLOWHEIGHT = 80;
     private static final int ALLOWWIDTH = 20;
@@ -377,6 +382,8 @@ public class Kirrkirr extends JPanel
                 kirrkirrSize = KirrkirrPanel.SMALL;
             } else if (lcSize.equals("LARGE")) {
                 kirrkirrSize = KirrkirrPanel.LARGE;
+            } else if (lcSize.equals("HUGE")) {
+                kirrkirrSize = KirrkirrPanel.HUGE;
             } else {
                 kirrkirrSize = KirrkirrPanel.NORMAL;
             }
@@ -385,6 +392,8 @@ public class Kirrkirr extends JPanel
                 kirrkirrSize = KirrkirrPanel.TINY;
             } else if (screenSize.height <= 640) {
                 kirrkirrSize = KirrkirrPanel.SMALL;
+            } else if (screenSize.height >= 2000) {
+                kirrkirrSize = KirrkirrPanel.HUGE;
             } else if (screenSize.height >= 1200) {
                 kirrkirrSize = KirrkirrPanel.LARGE;
             }
@@ -419,7 +428,7 @@ public class Kirrkirr extends JPanel
         // init each tabbed pane
         initializeTabbedPanes(kirrkirrSize);
 
-        /** splitPane contains the top/bottom tabbed panes,
+        /* splitPane contains the top/bottom tabbed panes,
          *  obp is the OneBoxPanel (the search toolbar).
          *  rhsPane holds both of these.
          *  centreSplit holds the headwords on the left and
@@ -505,36 +514,29 @@ public class Kirrkirr extends JPanel
         add(centreSplit);
         add(statusBar);
         if (kirrkirrSize <= KirrkirrPanel.TINY) {
-            if (false) {
-              if (screenSize.width < TINYWIDTH + ALLOWWIDTH) {
-                screenSize.width = screenSize.width - ALLOWWIDTH;
-              } else {
-                screenSize.width = TINYWIDTH;
-              }
-            } else {
-              screenSize.width = TINYWIDTH - ALLOWWIDTH;
-            }
-            if (false) {
-              if (screenSize.height < TINYHEIGHT + ALLOWHEIGHT) {
-                  screenSize.height = screenSize.height - ALLOWHEIGHT;
-              } else {
-                screenSize.height = TINYHEIGHT;
-              }
-            } else {
-              screenSize.height = TINYHEIGHT - ALLOWHEIGHT;
-            }
+            screenSize.width = TINYWIDTH - ALLOWWIDTH;
+            screenSize.height = TINYHEIGHT - ALLOWHEIGHT;
         } else {
+            // width
             if (Helper.onMacOSX()) {
                 if (screenSize.width < REGULARMACWIDTH + ALLOWWIDTH) {
                     screenSize.width = screenSize.width - ALLOWWIDTH;
                 } else {
-                    screenSize.width = REGULARMACWIDTH;
+                    if (kirrkirrSize >= KirrkirrPanel.HUGE) {
+                        screenSize.width = HUGE_WIDTH;
+                    } else {
+                        screenSize.width = REGULARMACWIDTH;
+                    }
                 }
             } else {
                 if (screenSize.width < REGULARWIDTH + ALLOWWIDTH) {
                     screenSize.width = screenSize.width - ALLOWWIDTH;
                 } else {
-                    screenSize.width = REGULARWIDTH;
+                    if (kirrkirrSize >= KirrkirrPanel.HUGE) {
+                        screenSize.width = HUGE_WIDTH;
+                    } else {
+                        screenSize.width = REGULARWIDTH;
+                    }
                }
             }
             if (screenSize.height < REGULARHEIGHT + ALLOWHEIGHT) {
@@ -824,7 +826,7 @@ public class Kirrkirr extends JPanel
      */
     public void initializeMenuBar(JFrame f) {
         JMenuBar menubar = new JMenuBar();
-        int keyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        int keyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
 
         menubar.setAlignmentX(LEFT_ALIGNMENT);
@@ -855,9 +857,9 @@ public class Kirrkirr extends JPanel
 
         if (Helper.onMacOSX()) {
             // Initialize handling special OS X menus
-            macOSXRegistration();
+            OSXUtils.macOSXRegistration(this);
         } else {
-            // Add Quit menu item.
+            // Add Quit or Exit menu item.
             // There's no quit item on the file menu in Mac OS X because it
             // is on the separate application menu
             file.add(new JSeparator());
@@ -992,9 +994,6 @@ public class Kirrkirr extends JPanel
             preferences.addActionListener(this);
         }
 
-
-
-
         ////////////////History Menu//////////////////////////////////////////
         //the History object has control over it's menu
         JMenu historyMenu = history.getHistoryMenu();
@@ -1006,7 +1005,6 @@ public class Kirrkirr extends JPanel
         // menubar.add(Box.createHorizontalGlue());
         menubar.add(Box.createHorizontalStrut(30));
 
-        // added by Jessica Halida
         // add new button
         JMenu help = new JMenu(Helper.getTranslation(SC_HELP));
         menubar.add(help);
@@ -1019,15 +1017,18 @@ public class Kirrkirr extends JPanel
             help.add(about = new JMenuItem(Helper.getTranslation(SC_ABOUT)));
             about.addActionListener(this);
         }
-        // added by Jessica Halida
+        contents.addActionListener(this);
+
+        // Now just use a little html browser for the help
+
         // enable help button, for "contents" option by calling the HelpBroker
-        if (createHelp()) {
-            helpBroker.enableHelpOnButton(contents,"help",null);
-            contents.addActionListener(this);
-        } else {
-            contents.setEnabled(false);
-            if (Dbg.ERROR) Dbg.print("Couldn't create JavaHelp");
-        }
+//        if (createHelp()) {
+//            helpBroker.enableHelpOnButton(contents,"help",null);
+//            contents.addActionListener(this);
+//        } else {
+//            contents.setEnabled(false);
+//            if (Dbg.ERROR) Dbg.print("Couldn't create JavaHelp");
+//        }
         if ( ! Helper.onMacOSX()) {
           // so it doesn't stick outside the Kirrkirr window
           // breaks and unnecessary for MacOSX when in menu bar
@@ -1042,6 +1043,7 @@ public class Kirrkirr extends JPanel
 
     // =============== Methods - in approximate alphabetical order ============
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object obj = e.getSource();
 
@@ -1110,7 +1112,8 @@ public class Kirrkirr extends JPanel
             // since openHelp function is replaced by calling the HelpSet
             // repaint it to refresh the applet after the button being clicked
             // openHelp(help_main);
-            scrollPanel.repaint();
+            displayHelp();
+            // scrollPanel.repaint();
         } else if (obj == about) {
             displayAbout();
         } else if ((obj == alphSort) || (obj == freqSort) || (obj == rhymeSort)){
@@ -1139,6 +1142,14 @@ public class Kirrkirr extends JPanel
         }
     }
 
+    public static void staticDisplayAbout() {
+        kk.displayAbout();
+    }
+
+    public static void staticDisplayPreferences() {
+        kk.displayPreferences();
+    }
+
     public void displayAbout() {
         new HtmlDialog(this, htmlFolder, HtmlDialog.NO_NOTES, help_about);
         //openHelp(help_about);
@@ -1150,6 +1161,13 @@ public class Kirrkirr extends JPanel
         kirrkirrOptions.setup();
         kirrkirrOptions.pack();
         kirrkirrOptions.setVisible(true);
+    }
+
+    public void displayHelp() {
+        new HtmlDialog(this, helpFolder, HtmlDialog.NO_NOTES, help_main);
+        //openHelp(help_about);
+        // cdm July 2007: I'm not sure if/why the below line is needed....
+        // scrollPanel.repaint();
     }
 
     /** Use to turn on display of subwords.
@@ -1307,6 +1325,7 @@ public class Kirrkirr extends JPanel
     }
 
 
+    /*
     // added by Jessica Halida
     private boolean createHelp() {
         //      ClassLoader loader = this.getClass().getClassLoader();
@@ -1331,15 +1350,14 @@ public class Kirrkirr extends JPanel
             return false;
         }
     }
+    */
 
-    public void disableGlossList()
-    {
+    public void disableGlossList() {
         scrollPanel.disableGlossList();
         //also remove any buttons/menu items having to do with gloss
     }
 
-    public void enableGlossList()
-    {
+    public void enableGlossList() {
         for (int i = TOPPANE; i < NUMPANES; i++) {
             for (int j=0;j<KKPANES;j++) {
                 if(KKTabs[i][j]!=null)
@@ -1689,9 +1707,7 @@ public class Kirrkirr extends JPanel
         	}
            	inGamePane = true;
            	if (hintsOn) addHintPanel();
-        }
-        else
-        {
+        } else {
             panel.tabSelected();
             if (!(panel instanceof GameSelectPanel)) {
 
@@ -1771,6 +1787,7 @@ public class Kirrkirr extends JPanel
     /** Listener to the HtmlPanel -- this is here because the HtmlPanel's
      *  parent could also be an HtmlDialog frame (but reorganize this?)
      */
+    @Override
     public void wordClicked(String uniqueKey, JComponent signaller) {
         setCurrentWord(uniqueKey, false, signaller, HTML, 0);
     }
@@ -1916,27 +1933,6 @@ public class Kirrkirr extends JPanel
             if (Dbg.MEMORY) {
                 Dbg.memoryUsage("at start up");
             }
-
-              if (Helper.onMacOSX()) {
-                  try {
-                      if (Dbg.PROGRESS) Dbg.print("On MacOSX doing menu setup");
-                      // So menu appears on top of screen for Mac
-                      // for Mac Java 1.4
-                      System.setProperty("apple.laf.useScreenMenuBar", "true");
-                      // for Mac Java 1.3
-                      System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-                      System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Kirrkirr");
-
-                      // System.setProperty("com.apple.macos.use-file-dialog-packages", "true");
-                      // use java.awt.FileChooser rather than javax.swing.JFileChooser.
-                      // See http://developer.apple.com/samplecode/OSXAdapter/OSXAdapter.html for handling Apple application menu
-                      // apple.awt.showGrowBox
-                      // apple.awt.brushMetalLook
-                  } catch (Exception e) {
-                    Dbg.print("Error in MacOS setup");
-                    e.printStackTrace();
-                  }
-              }
 
             // Get properties for Kirrkirr
             props = new Properties();
@@ -2084,6 +2080,9 @@ public class Kirrkirr extends JPanel
 
     private static void mainInit(String[] argv, boolean reloading) {
         try {
+            Logger logger = LoggerFactory.getLogger(Kirrkirr.class);
+            logger.info("Starting up Kirrkirr!");
+
             if (Dbg.TIMING) {
                 Dbg.startTime();
             }
@@ -2092,25 +2091,7 @@ public class Kirrkirr extends JPanel
             }
 
             if (Helper.onMacOSX()) {
-              try {
-                  if (Dbg.PROGRESS) Dbg.print("On MacOSX doing menu setup");
-                  // So menu appears on top of screen for Mac
-                  // for Mac Java 1.4
-                  System.setProperty("apple.laf.useScreenMenuBar", "true");
-                  // for Mac Java 1.3
-                  System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-                  System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Kirrkirr");
-				  System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Stanford RTE");
-
-                  System.setProperty("com.apple.macos.use-file-dialog-packages", "true");
-                  // use java.awt.FileChooser rather than javax.swing.JFileChooser.
-                  // See http://developer.apple.com/samplecode/OSXAdapter/OSXAdapter.html for handling Apple application menu
-                  // apple.awt.showGrowBox
-                  // apple.awt.brushMetalLook
-              } catch (Exception e) {
-                Dbg.print("Error in Mac OS X setup");
-                e.printStackTrace();
-              }
+                OSXUtils.setUpMacSystemProperties();
             }
 
             if (! reloading) {
@@ -2299,6 +2280,7 @@ public class Kirrkirr extends JPanel
         }
     }
 
+
     public void loadNewDict(String dir) {
     	LoadDictDir ldd = new LoadDictDir();
     	ldd.setDir(dir);
@@ -2311,6 +2293,7 @@ public class Kirrkirr extends JPanel
 
     	private String dictDir;
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             JFileChooser fileChooser = new JFileChooser(new File(RelFile.WRITE_DIRECTORY)); // change? base dir (RelFile.codeBase)? - they actually start off the same (RelFile.Init)
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -2331,6 +2314,7 @@ public class Kirrkirr extends JPanel
         	dictDir = dir;
         }
 
+        @Override
         public void run() {
             progress = new ProgressDialog(Helper.getTranslation(SC_STARTING),
                                           PROGRESS_MAX_VAL);
@@ -2367,19 +2351,15 @@ public class Kirrkirr extends JPanel
             }
 
             try {
+                Kirrkirr.kk.changeProperty("kirrkirr.dictionaryDirectory", dictDir);
+                Kirrkirr.kk.changeProperty("dictionary.domainConverter", "null");
 
-            Kirrkirr.kk.changeProperty("kirrkirr.dictionaryDirectory",
-                    dictDir);
-            Kirrkirr.kk.changeProperty("dictionary.domainConverter",
-                    "null");
-
-
-			PropertiesUtils.changeProperty(props,
-			     RelFile.MakeWriteFileName(null, PROPERTIES_FILE),
+                PropertiesUtils.changeProperty(props,
+                        RelFile.MakeWriteFileName(null, PROPERTIES_FILE),
 					"kirrkirr.dictionaryDirectory",
 			     dictDir);
-			if (Dbg.VERBOSE) Dbg.print(
-					"Properties: changed kirrkirr.dictionaryDirectory to "
+                if (Dbg.VERBOSE) Dbg.print(
+                        "Properties: changed kirrkirr.dictionaryDirectory to "
 			                        + dictDir);
             } catch (Exception ex) {
                 if (Dbg.ERROR)
@@ -2395,46 +2375,6 @@ public class Kirrkirr extends JPanel
             reload(args);
         }
     } // end class LoadDictDir
-
-
-    /** Generic registration with the Mac OS X application menu.  Attempts
-     *  to register with the Apple EAWT.  This code assumes you're running this
-     *  inside a test for being on a Mac OS X machine.
-     *  This method calls OSXAdapter.registerMacOSXApplication() and OSXAdapter.enablePrefs().
-     *  See OSXAdapter.java for the signatures of these methods.
-     */
-    public void macOSXRegistration() {
-        try {
-            Class osxAdapter = ClassLoader.getSystemClassLoader().loadClass("Kirrkirr.util.OSXAdapter");
-
-            Class[] defArgs = {Kirrkirr.class};
-            Method registerMethod = osxAdapter.getDeclaredMethod("registerMacOSXApplication", defArgs);
-            if (registerMethod != null) {
-                Object[] args = { this };
-                registerMethod.invoke(osxAdapter, args);
-            }
-            // This is slightly gross.  To reflectively access methods with boolean args,
-            // use "boolean.class", then pass a Boolean object in as the arg, which apparently
-            // gets converted for you by the reflection system.
-            defArgs[0] = boolean.class;
-            Method prefsEnableMethod = osxAdapter.getDeclaredMethod("enablePrefs", defArgs);
-            if (prefsEnableMethod != null) {
-                Object[] args = { Boolean.TRUE };
-                prefsEnableMethod.invoke(osxAdapter, args);
-            }
-        } catch (NoClassDefFoundError e) {
-            // This will be thrown first if the OSXAdapter is loaded on a system without the EAWT
-            // because OSXAdapter extends ApplicationAdapter in its def
-            System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
-        } catch (ClassNotFoundException e) {
-            // This shouldn't be reached; if there's a problem with the OSXAdapter we should get the
-            // above NoClassDefFoundError first.
-            System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
-        } catch (Exception e) {
-            System.err.println("Exception while loading the OSXAdapter:");
-            e.printStackTrace();
-        }
-    }
 
 }
 

@@ -659,6 +659,7 @@ public class SearchPanel extends KirrkirrPanel
 
 
     /** Called when scroll list changes. */
+    @Override
     public void scrollPanelChanged(boolean toGloss) {
         clearSearchResults();
         withNote.setEnabled( ! toGloss);
@@ -670,6 +671,7 @@ public class SearchPanel extends KirrkirrPanel
      *  pane containing this panel.
      *  @return the string to be used as rollover text
      */
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_SEARCH_ROLLOVER);
     }
@@ -679,6 +681,7 @@ public class SearchPanel extends KirrkirrPanel
     *  When something in the list is selected and autoselect
     *  is true, selects the word in the main list.
     */
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel)e.getSource();
         if (!lsm.isSelectionEmpty() && autoselect.isSelected()) {
@@ -690,6 +693,7 @@ public class SearchPanel extends KirrkirrPanel
     /** Listens to search box and start, stop,
      *  highlight and filter main list (copy) buttons.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == searchBox || src == start)
@@ -709,9 +713,10 @@ public class SearchPanel extends KirrkirrPanel
 
     /** Must override method from abstract class KirrkirrPanel. Here a no-op.
      */
+    @Override
     public void setCurrentWord(/* padded */ String tailWord, boolean gloss,
-                        final JComponent signaller, final int signallerType,
-                        final int arg) {
+                                            final JComponent signaller, final int signallerType,
+                                            final int arg) {
         // do nothing
     }
 
@@ -724,6 +729,7 @@ public class SearchPanel extends KirrkirrPanel
      *  @param isCut true if this should be a cut operation
      *  @return how many characters were copied (0 if no selection)
      */
+    @Override
     public int copyText(boolean isCut) {
         int count = table.getSelectedRowCount();
         if (count > 0) {
@@ -1454,6 +1460,7 @@ public class SearchPanel extends KirrkirrPanel
 
 
     /** Add a single matching item to the set of search results.
+     *
      *  @param m A match that was found. This must be non-null.
      *  @param current The unique key of the word that we are currently
      *            searching.
@@ -1503,7 +1510,7 @@ public class SearchPanel extends KirrkirrPanel
             FileInputStream fis = new
             FileInputStream(RelFile.MakeFileName(RelFile.dictionaryDir,
                                                  Kirrkirr.xmlFile));
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf-8"));
             String line;
             String headWord = null;
             String headUniquifier = null;
@@ -1597,8 +1604,7 @@ public class SearchPanel extends KirrkirrPanel
             } // while
             br.close();
             if (Dbg.TIMING) {
-                long endtime=System.currentTimeMillis();
-                endtime=endtime-starttime;
+                long endtime = System.currentTimeMillis() - starttime;
                 Dbg.print("search took " + endtime + "ms");
             }
             finishUpSearch(i, matched);
@@ -1650,6 +1656,7 @@ public class SearchPanel extends KirrkirrPanel
      *  CDM Nov 2001: is the loop in this method actually doing anything
      *  (sensible)???
      */
+    @Override
     public void run() {
         Thread myThread = Thread.currentThread();
         while (searcherThread == myThread) {
@@ -1692,6 +1699,7 @@ public class SearchPanel extends KirrkirrPanel
     private static void printSearchStatus(final JPanel jp, final String text)
     {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 jp.setBorder(BorderFactory.createTitledBorder(
                                 Helper.getTranslation(SC_SEARCH)+": " + text));
@@ -1720,18 +1728,22 @@ public class SearchPanel extends KirrkirrPanel
             data = new Vector();
         }
 
+        @Override
         public int getColumnCount() {
             return SearchPanel.COLS;
         }
 
+        @Override
         public int getRowCount() {
             return data.size();
         }
 
+        @Override
         public String getColumnName(int col) {
             return (String) columnNames.col[col];
         }
 
+        @Override
         public Object getValueAt(int row, int col) {
             return ((MatchItem)data.elementAt(row)).col[col];
         }
@@ -1753,6 +1765,7 @@ public class SearchPanel extends KirrkirrPanel
          * text in the cell & even copy it.
          * This is not possible if you only return false!
          */
+        @Override
         public boolean isCellEditable(int row, int col) {
             //Note that the data/cell address is constant,
             //no matter where the cell appears onscreen.
@@ -1763,6 +1776,7 @@ public class SearchPanel extends KirrkirrPanel
          * Don't need to implement this method unless your table's
          * data can change.
          */
+        @Override
         public void setValueAt(Object value, int row, int col) {
             if (Dbg.SEARCH) {
                 Dbg.print("Setting value at " + row + ',' + col
@@ -1846,20 +1860,20 @@ public class SearchPanel extends KirrkirrPanel
 
     } // end class MyTableModel
 
+
+    /** MatchItems are used in the SearchPanel scrolled table to store
+     *  results.  The first column holds a printable version of the word or gloss,
+     *  and the second column holds the part of the entry that matched.
+     */
+    static class MatchItem {
+
+        Object[] col;
+
+        MatchItem() {
+            col = new Object[SearchPanel.COLS];
+        }
+
+    } // end static class MatchItem
+
 } // end class SearchPanel
-
-
-/** MatchItems are used in the SearchPanel scrolled table to store
- *  results.  The first column holds a printable version of the word or gloss,
- *  and the second column holds the part of the entry that matched.
- */
-class MatchItem {
-
-    Object[] col;
-
-    MatchItem() {
-        col = new Object[SearchPanel.COLS];
-    }
-
-}
 

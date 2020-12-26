@@ -40,7 +40,7 @@ public class DictFields implements Serializable {
      */
     public Vector<DictField> toVector() {
         int size = field.length;
-        Vector<DictField> v = new Vector<>(size);
+        Vector<DictField> v = new Vector<DictField>(size);
         for (DictField item : field) {
             v.addElement(item);
         }
@@ -74,7 +74,7 @@ public class DictFields implements Serializable {
      *  @return the union (this)
      */
     public DictFields union(DictFields dfs) {
-        Vector<DictField> v = new Vector<>();
+        Vector<DictField> v = new Vector<DictField>();
         for (int j = 0; j < dfs.field.length; j++) {
             if ( ! member(dfs.field[j])) {
                 v.addElement(dfs.field[j]);

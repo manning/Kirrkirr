@@ -6,15 +6,13 @@ import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-
+/** Some standalone method for Nahuatl botany pictures. Maybe can delete? */
 public class PictureAdder {
 
-    private static Hashtable plants;
-    private static Vector dictStrings;
     // delimiters for the xml dictionary
-    private final static String delim = "\t\r\n";
+    private static final String delim = "\t\r\n";
 
-    public static void main(String argv[]){
+    public static void main(String[] argv){
         //clearPicList();
         linkPictures();
     }
@@ -56,10 +54,10 @@ public class PictureAdder {
 
     public static void linkPictures(){
 
-        plants = new Hashtable();
+        Hashtable plants = new Hashtable();
         long currLength, hashLength;
         RandomAccessFile botanyDoc;
-        try{
+        try {
             // scanning the picture list
         botanyDoc = new RandomAccessFile("NahuatlBotany.txt", "r");
         currLength = botanyDoc.getFilePointer();
@@ -130,7 +128,7 @@ public class PictureAdder {
 
         RandomAccessFile dictionary, newDict;
         PictureKey newKey = new PictureKey();
-        dictStrings = new Vector();
+        Vector dictStrings = new Vector();
         long dictLength, currPos;
         String dictLine;
         try{
@@ -220,9 +218,9 @@ public class PictureAdder {
              return;
         }
         try{
-            for(int i=0; i<dictStrings.size(); i++){
+            for(int i = 0; i< dictStrings.size(); i++){
                 //System.out.println((String)dictStrings.elementAt(i));
-                newDict.writeBytes((String)dictStrings.elementAt(i)+"\n");
+                newDict.writeBytes((String) dictStrings.elementAt(i)+"\n");
             }
         }catch (Throwable exception) {
             exception.printStackTrace();

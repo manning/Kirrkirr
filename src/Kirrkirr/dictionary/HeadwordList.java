@@ -14,6 +14,7 @@ public class HeadwordList extends WordList {
         super(r, parent, p, size, "HWlist: ");
     }
 
+    @Override
     protected void setWord(String word) {
         this.parent.setCurrentWord(word,false,jWords,Kirrkirr.SCROLLPANEL,1);
     }
@@ -26,10 +27,12 @@ public class HeadwordList extends WordList {
         return parent.cache.headwordList;
     }
 
+    @Override
     public String getFuzzy(String word) {
         return SearchPanel.headwordFuzzy(word);
     }
 
+    @Override
     public void refreshWords(int attributeChanged) {
         if (attributeChanged==ScrollPanel.SEE_SUB) {
             if ( ! attributes[ScrollPanel.SEE_SUB]) {
@@ -49,6 +52,7 @@ public class HeadwordList extends WordList {
         jWords.repaint();
     }
 
+    @Override
     protected void initAttributes(){
         attributes=new boolean[ScrollPanel.WARLPIRI_ATTRIBUTES];
         attributes[ScrollPanel.SEE_POLY]=false; // item starts unset in menu

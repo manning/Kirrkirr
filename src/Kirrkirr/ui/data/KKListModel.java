@@ -14,6 +14,7 @@ import java.util.*;
 
 import javax.swing.AbstractListModel;
 
+// todo: CDM 2018: Can't we just extend DefaultListModel and just implement a constructor and maybe an addAll()?
 
 /** This is a trivial extension of DefaultListModel which provides a
  *  constructor for "bulk loading" a Vector of elements.  This appears to be
@@ -37,11 +38,11 @@ import javax.swing.AbstractListModel;
  * @version 1.26 02/02/00
  * @author Hans Muller
  */
-public class KKListModel<E> extends AbstractListModel<E> {
+public class KKListModel<E> extends AbstractListModel {
 
     private static final long serialVersionUID = -6213104566118351479L;
 
-    private Vector<E> delegate = new Vector<>();
+    private Vector<E> delegate = new Vector<E>();
 
     // ---- start of new stuff
 

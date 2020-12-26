@@ -12,8 +12,10 @@ import java.net.*;
 
 import javax.swing.*;
 
+import org.apache.oro.text.regex.MatchResult;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.Perl5Matcher;
 import org.w3c.dom.*;
-import org.apache.oro.text.regex.*;
 import org.apache.xpath.*;
 
 /** The {@code DictionaryCache} object controls all the dictionary data
@@ -1197,7 +1199,7 @@ public final class DictionaryCache implements Serializable {
     }
 
 
-    /** For reverse lookup of headword words by their filepositions, used by
+    /** For reverse lookup of headword words by their file positions, used by
      *  gloss. Given a file position, gets the xml file at that position,
      *  and retrieves the headword. Adds that headword to the cache, and
      *  returns the padded headword string. Generates xml automatically
@@ -1737,7 +1739,7 @@ public final class DictionaryCache implements Serializable {
         Document myxml = getXmlEntry(de.fpos);
         DictFields dial = getDialectFromDoc(myxml);
         if (dial==null || dial.size()==0) return null;
-        Vector<String> v = new Vector<>();
+        Vector<String> v = new Vector<String>();
         for (int i=0;i<dial.size();i++)
             v.addElement(dial.get(i).uniqueKey);
         return v;
@@ -1756,7 +1758,7 @@ public final class DictionaryCache implements Serializable {
         Document myxml = getXmlEntry(de.fpos);
         DictFields pos = getPOSFromDoc(myxml);
         if (pos==null || pos.size()==0) return null;
-        Vector<String> v = new Vector<>();
+        Vector<String> v = new Vector<String>();
         for (int i=0;i<pos.size();i++)
             v.addElement(pos.get(i).uniqueKey);
         return v;
@@ -2185,7 +2187,7 @@ public final class DictionaryCache implements Serializable {
             return null;
         }
         Element  root = (Element) doc.getFirstChild();
-        Vector<Node> senses = new Vector<>();
+        Vector<Node> senses = new Vector<Node>();
         senses.addElement(root);
 
         //support for multiple senses: we make a list to look up information in primary entry and each sense

@@ -15,13 +15,12 @@ import java.awt.event.*;
 
 
 /** MediaPanel: displays the multimedia files associated
- *  with a given word. Can have pictures and sounds. (But
- *  in jdk1.1, only applets can play sounds).
+ *  with a given word. Can have pictures and sounds.
  */
-public class MediaPanel extends KirrkirrPanel implements ActionListener, PicturePanelCallback
-{
-    private SoundPanel soundPanel;
-    private SlideShowPanel picturePanel;
+public class MediaPanel extends KirrkirrPanel implements ActionListener, PicturePanelCallback {
+
+    private final SoundPanel soundPanel;
+    private final SlideShowPanel picturePanel;
 
     private DictFields currentImages; // = null;
     private static final String defaultPic = "default.gif";
@@ -63,6 +62,7 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
      *  pane containing this panel.
      *  @return the string to be used as rollover text
      */
+    @Override
     public String getTabRollover() {
 	return Helper.getTranslation(SC_MEDIA_ROLLOVER);
     }
@@ -82,9 +82,10 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
      *  multiple setCurrentWord calls and when to restart.  Should be
      *  redone when setCurrentWord is rethought.
      */
+    @Override
     public void setCurrentWord(/* padded */ String tailWord, boolean gloss,
-    			final JComponent signaller, final int signallerType,
-			final int arg)
+                                            final JComponent signaller, final int signallerType,
+                                            final int arg)
     {
 	if (Dbg.K) {
 	    Dbg.print("MP: setCurrentWord: " + tailWord + " gloss is " +
@@ -143,28 +144,30 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
      *  Assumption: next and/or previous should only be enabled if there are
      *  pictures, so we can assume that currentImages is non-null.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
     }
 
+    @Override
     public void imageUpdated() {
 	picturePanel.setLabelText((picturePanel.getShowIndex()+1)+" "+SC_OF+" "+picturePanel.getShowSize());
     }
 
     static class SoundPanel extends JPanel implements ActionListener {
 
-        private JButton playAu;
-        private JButton stopAu;
-        private JButton previous;
-        private JButton next;
-        private JLabel currentLabel;
+        private final JButton playAu;
+        private final JButton stopAu;
+        private final JButton previous;
+        private final JButton next;
+        private final JLabel currentLabel;
         private int current = 0;
         private AudioClip currentClip; //=null;
-        private Kirrkirr parent;
+        private final Kirrkirr parent;
         private DictFields currentSounds;
 
         private boolean audioCapable = true;
 
-        private JPanel dir_p;
+        private final JPanel dir_p;
         private final Dimension maximumSize = new Dimension(200, 1000);
         private final Dimension minimumSize = new Dimension(140, 100);
 	// you need it to be wide enough for play word and stop to appear

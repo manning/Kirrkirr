@@ -4,28 +4,27 @@ import Kirrkirr.Kirrkirr;
 import Kirrkirr.util.*;
 import Kirrkirr.ui.KirrkirrButton;
 
-import java.io.*;
 import java.util.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.datatransfer.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
-/** The <code>SemanticExplorer</code> presents a tree-based explorer
- *  that lets the user navigate the <DOMAIN> hierarchy.
+/** The SemanticExplorer presents a tree-based explorer
+ *  that lets the user navigate the {@code <DOMAIN>} hierarchy.
+ *
  *  @author      Kevin Jansz
  *  @see Kirrkirr
  */
 public class SemanticExplorerPanel extends KirrkirrPanel
             implements TreeSelectionListener, ActionListener {
 
-    private JButton clear;
-    private JButton collapse;
-    private JButton expand;
+    private final JButton clear;
+    private final JButton collapse;
+    private final JButton expand;
 
     private static final String SC_NAME="Domains";
     private static final String SC_ROOT="Semantic_Domain";
@@ -36,10 +35,11 @@ public class SemanticExplorerPanel extends KirrkirrPanel
     private static final String SC_DESC="Explore a tree view of semantic domains";
     private static final String SC_WORD="Word";
 
-    private JTree tree; // = null;
-    private DefaultTreeModel treeModel;
-    private SemanticTreeNode root;
-    private SemanticTreeNode noDomain;
+    private final JTree tree; // = null;
+    private final DefaultTreeModel treeModel;
+    private final SemanticTreeNode root;
+    private final SemanticTreeNode noDomain;
+
 
     public SemanticExplorerPanel (Kirrkirr kparent, JFrame window, int size) {
         super(kparent, window);
@@ -88,13 +88,15 @@ public class SemanticExplorerPanel extends KirrkirrPanel
      *  pane containing this panel.
      *  @return the string to be used as rollover text
      */
+    @Override
     public String getTabRollover() {
         return SC_DESC;
     }
 
 
-    public void tabSelected()
-    {/*
+    @Override
+    public void tabSelected() {
+      /*
         String tailWord = (String) parent.scrollPanel.getSelectedWord();
         Vector backwardList = parent.history.getBackwardList();
         // Lim Hong Lee:
@@ -110,8 +112,9 @@ public class SemanticExplorerPanel extends KirrkirrPanel
     }
 
 
+    @Override
     public void setCurrentWord(String uniqueKey, boolean gloss,
-                         final JComponent signaller, final int signallerType,
+                               final JComponent signaller, final int signallerType,
                                final int arg) {
         if (gloss) return;
         Vector dF = parent.cache.getAllDomains(uniqueKey);
@@ -120,8 +123,8 @@ public class SemanticExplorerPanel extends KirrkirrPanel
             return;
         }
         SemanticTreeNode last = root;
-        SemanticTreeNode next = null;
-        Vector newWordNodes = new Vector();
+        SemanticTreeNode next; // = null;
+        Vector<SemanticTreeNode> newWordNodes = new Vector<>();
         if (Dbg.DOMAINS) Dbg.print("Doing " + Helper.uniqueKeyToPrintableString(uniqueKey) + ", dF is " + dF + " of size " + dF.size());
 
         // System.err.println("Last is |" + last + "|");
@@ -159,10 +162,10 @@ public class SemanticExplorerPanel extends KirrkirrPanel
         newWordNodes.addElement(next);
 
         int newWordCount = newWordNodes.size();
-        TreePath paths[] = new TreePath[newWordCount];
+        TreePath[] paths = new TreePath[newWordCount];
 
         for (int i=0 ; i < newWordCount ; i++) {
-            TreeNode[] nodes = treeModel.getPathToRoot((SemanticTreeNode) newWordNodes.elementAt(i));
+            TreeNode[] nodes = treeModel.getPathToRoot(newWordNodes.elementAt(i));
             paths[i] = new TreePath(nodes);
             tree.makeVisible(paths[i]);
         }
@@ -181,8 +184,8 @@ public class SemanticExplorerPanel extends KirrkirrPanel
      *  Overrides KirrkirrPanel
      *  This now seems to be partly working, but one doesn't get anything
      *  from control-C in semantic explorer, as no keyboard stuff built-in.
-     *  @param isCut true if this should be a cut operation
-     *  @return how many characters were copied (0 if no selection)
+     *
+]     *  @return how many characters were copied (0 if no selection)
      */
     public int copyText() {
         if (Dbg.CUTPASTE) Dbg.print("SemanticExplorer: called copy text");
@@ -234,26 +237,24 @@ public class SemanticExplorerPanel extends KirrkirrPanel
             }
             //System.out.println("Added: "+newNode.getUserObject());
         }
-        return(newNode);
+        return newNode;
     }
 
 
     void removeAllChildren(SemanticTreeNode node) {
         int kids = node.getChildCount();
-        SemanticTreeNode target;
 
-        for(int i=(kids-1) ; i >= 0 ; i--) {
-            target = (SemanticTreeNode)node.getChildAt(i);
+        for (int i=(kids-1) ; i >= 0 ; i--) {
+            SemanticTreeNode target = (SemanticTreeNode) node.getChildAt(i);
             treeModel.removeNodeFromParent(target);
         }
     }
 
     void collapseAllChildren(SemanticTreeNode node) {
         int kids = node.getChildCount();
-        SemanticTreeNode target;
 
-        for(int i=(kids-1) ; i >= 0 ; i--) {
-            TreeNode[] nodes = treeModel.getPathToRoot((SemanticTreeNode)node.getChildAt(i));
+        for (int i=(kids-1) ; i >= 0 ; i--) {
+            TreeNode[] nodes = treeModel.getPathToRoot(node.getChildAt(i));
             TreePath path = new TreePath(nodes);
             tree.collapsePath(path);
         }
@@ -264,7 +265,7 @@ public class SemanticExplorerPanel extends KirrkirrPanel
         SemanticTreeNode target;
 
         for(int i=(kids-1) ; i >= 0 ; i--) {
-            TreeNode[] nodes = treeModel.getPathToRoot((SemanticTreeNode)node.getChildAt(i));
+            TreeNode[] nodes = treeModel.getPathToRoot(node.getChildAt(i));
             TreePath path = new TreePath(nodes);
             tree.expandPath(path);
         }
@@ -273,6 +274,7 @@ public class SemanticExplorerPanel extends KirrkirrPanel
 
     /** TreeSelectionListener interface.
      */
+    @Override
     public void valueChanged(TreeSelectionEvent event) {
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         TreePath path = tree.getSelectionPath();
@@ -294,8 +296,8 @@ public class SemanticExplorerPanel extends KirrkirrPanel
     /** ActionListener interface (listens to JButton clicks).
      *  @param e the event that has arrived
      */
-    public void actionPerformed(ActionEvent e)
-    {
+    @Override
+    public void actionPerformed(ActionEvent e) {
         Object obj = e.getSource();
         if (obj.equals(clear) ) {
             clearExplorer();
@@ -307,6 +309,7 @@ public class SemanticExplorerPanel extends KirrkirrPanel
     }
 
 
+    @Override
     public boolean isResizable() {
         return(true);
     }
@@ -331,10 +334,9 @@ public class SemanticExplorerPanel extends KirrkirrPanel
         }
 
         SemanticTreeNode getChildWithValue(String dF) {
-            SemanticTreeNode found;
             int numKids = getChildCount();
             for (int i=0 ; i < numKids; i++) {
-                found = (SemanticTreeNode) getChildAt(i);
+                SemanticTreeNode found = (SemanticTreeNode) getChildAt(i);
                 if ((found.getUserObject()).equals(dF)) {
                     return(found);
                 }

@@ -25,7 +25,7 @@ import javax.swing.event.*;
 
 public class PositionTracker extends JPanel implements ListSelectionListener {
 
-    private DomainTree dtree;
+    private final DomainTree dtree;
     private JList hierarchyList;
     private JList childrenList;
 

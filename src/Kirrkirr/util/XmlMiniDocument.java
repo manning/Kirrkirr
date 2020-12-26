@@ -225,18 +225,21 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
 
     //--- Functions to implement the ContentHandler interface ---
 
+    @Override
     public void startDocument ()
     {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "Start document");
     }
 
+    @Override
     public void endDocument ()
     {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "End document");
     }
 
+    @Override
     public void startElement(String uri, String name, String raw,
-                                                      Attributes attrs) {
+                             Attributes attrs) {
         entryDepth++;
         if (Dbg.ERROR && entryDepth == MAXDEPTH) {
             Dbg.print("XmlMini: Help!  XML nesting depth exceeded!");
@@ -279,8 +282,8 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
 
 
     /** Normalizes the given string. */
-    protected String normalize(String s) {
-        StringBuffer str = new StringBuffer();
+    private static String normalize(String s) {
+        StringBuilder str = new StringBuilder();
 
         int len = (s != null) ? s.length() : 0;
         for (int i = 0; i < len; i++) {
@@ -319,6 +322,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     } // normalize(String):String
 
 
+    @Override
     public void endElement(String uri, String name, String raw) {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "End element:  " + name);
 
@@ -343,6 +347,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     }
 
 
+    @Override
     public void characters(char[] ch, int start, int length)
     {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "Character data:  \"" + escape(ch, start, length) + '"');
@@ -358,6 +363,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     }
 
 
+    @Override
     public void ignorableWhitespace (char[] ch, int start, int length)
     {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "Ignorable whitespace:  \"" + escape(ch, start, length) + '"');
@@ -386,6 +392,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     } // getLocationString(SAXParseException):String
 
 
+    @Override
     public void processingInstruction (String target, String data)
     {
         if (Dbg.PARSE) Dbg.linePrint(entryDepth, "Processing Instruction: "
@@ -409,6 +416,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     private boolean seenError = false;
 
     /** Warning. */
+    @Override
     public void warning(SAXParseException ex) {
     	if ( ! seenError) {
                 seenError = true;
@@ -427,6 +435,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     }
 
     /** Error. */
+    @Override
     public void error(SAXParseException ex) {
         if ( ! seenError) {
             seenError = true;
@@ -447,6 +456,7 @@ public final class XmlMiniDocument extends DefaultHandler implements EntityResol
     }
 
     /** Fatal error. */
+    @Override
     public void fatalError(SAXParseException ex) {
         if (Dbg.ERROR) {
             System.err.println("[Fatal Error] "+

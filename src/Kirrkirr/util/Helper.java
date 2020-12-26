@@ -285,7 +285,22 @@ public class Helper {
     //   New features for 1.4
     // }
     // mrj.version is still present but disrecommended.
+    // It became just "OS X" at some point
 
+    private static int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf('.');
+            if (dot != -1) { version = version.substring(0, dot); }
+        } return Integer.parseInt(version);
+    }
+
+    /** Returns onAMactrue if on JDK 8 or earlier, so old macOS setup */
+    public static boolean onOlderJdk() {
+        return getJavaVersion() <= 8;
+    }
 
     public static boolean onAMac() {
         return onMacOSX() || onAMacLegacyTest();
@@ -306,7 +321,8 @@ public class Helper {
 
     public static boolean onMacOSX() {
         String osName = System.getProperty("os.name");
-        return (osName != null) && (osName.startsWith("Mac OS X"));
+        return (osName != null) && (osName.startsWith("Mac OS X") ||
+                osName.startsWith("OS X"));
     }
 
 

@@ -15,14 +15,14 @@ import java.applet.*;
  *  The Init method sets up the parameters.
  *  The rest looks in or down up to two levels below the codebase.
  *  The first level corresponds to language and the second to file type
- *
+ *  <p>
  *  OS specific: if (System.getProperty("os.name").startsWith("Windows"))
- *
+ *  <p>
  *  RelFile.java -- (c) christopher manning -- may 1999
  *  10/9/99 - kjansz add the write-file interface
  */
-public final class RelFile
-{
+public final class RelFile {
+
     //static string constants that need to be translated
     //these three public because accessed in DirsOptionPanel
     public static final String SELECT_TEMP_DIR =
@@ -33,16 +33,16 @@ public final class RelFile
     /** The character encoding used on created files */
     public static final String ENCODING = "UTF-8";
 
-    static private String lineSeparator;
-    static private String fileSeparator; // = null;
-    static private boolean isApplet; // = false;
-    static private String codeBaseStr; // = null;
-    static private URL codeBase; // = null;
-    static public String WRITE_DIRECTORY; // = null;
-    static private boolean applAudio; // = false;
-                // this is true if application is capable of playing audio
-    static private String[] htmlCreators = {"MOSS","MSIE"};//MOSS is netscape; MSIE is internet explorer.
-    static private String htmlCreator=null;
+    private static String lineSeparator;
+    private static String fileSeparator; // = null;
+    private static boolean isApplet; // = false;
+    private static String codeBaseStr; // = null;
+    private static URL codeBase; // = null;
+    public static String WRITE_DIRECTORY; // = null;
+    private static boolean applAudio; // = false;
+    // this is true if application is capable of playing audio
+    private static final String[] htmlCreators = {"MOSS","MSIE"}; //MOSS is netscape; MSIE is internet explorer.
+    private static String htmlCreator; // =null;
 
     //read in from properties file, or user-prompted,
     //*required* to access dictionary and other dictionary-specific
@@ -60,8 +60,7 @@ public final class RelFile
      * be found).
      * @param codeBase the URL representing the codebase/Kirrkirr home.
      */
-    public static void Init(URL codeBase)
-    {
+    public static void Init(URL codeBase) {
         isApplet = true;
         fileSeparator = "/";
         lineSeparator = System.getProperty("line.separator");
@@ -104,12 +103,11 @@ public final class RelFile
      * be found).
      * @param directory the string of the user's codebase/Kirrkirr directory.
      */
-    public static void Init(String directory)
-    {
+    public static void Init(String directory) {
         isApplet = false;
         fileSeparator = System.getProperty("file.separator");
         lineSeparator = System.getProperty("line.separator");
-        if (directory.equals("")) {
+        if (directory.isEmpty()) {
             codeBaseStr = System.getProperty("user.dir");
         } else {
             codeBaseStr = directory;
@@ -176,7 +174,7 @@ public final class RelFile
 
 
     public static boolean isUrl(String s) {
-        return s.trim().toLowerCase().startsWith("http://");
+        return s != null && s.trim().toLowerCase().startsWith("http://");
     }
 
 
@@ -209,7 +207,7 @@ public final class RelFile
          if (s != -1) {
             file = file.substring(s+sep.length());
         }
-        return (file);
+        return file;
     }
 
 
@@ -238,8 +236,7 @@ public final class RelFile
      *  fileseparator.
      */
     private static void FillStringBuffer(StringBuffer sb, String base,
-                                  String folder, String subfolder, String file)
-    {
+                                  String folder, String subfolder, String file) {
         if (base != null && ! base.equals("")) {
             sb.append(base);
             sb.append(fileSeparator);
@@ -308,8 +305,7 @@ public final class RelFile
      *  @return the string representing the filename (including the subfolder)
      *          specified relative to the temporary (writeable) directory
      */
-    public static String MakeWriteFileName(String subfolder, String file)
-    {
+    public static String MakeWriteFileName(String subfolder, String file) {
         StringBuffer sb = new StringBuffer(80);  // initial size; starts empty
 
         FillStringBuffer(sb, WRITE_DIRECTORY, null, subfolder, file);
@@ -481,21 +477,20 @@ public final class RelFile
 
 
    /**
-     * Get a String representation of the URL of the filename specified
-     * in the subfolder specified, relative to to the user's temporary
-     * (writeable) directory.
-     * @return the URL representing the filename (including the subfolder)
-     * specified relative to the temporary (writeable) directory, or the null
-     * if the file URL can't be formed
-     */
-    public static String MakeWriteURLString(String subfolder, String file)
-    {
+    * Get a String representation of the URL of the filename specified
+    * in the subfolder specified, relative to to the user's temporary
+    * (writeable) directory.
+    * @return the URL representing the filename (including the subfolder)
+    * specified relative to the temporary (writeable) directory, or the null
+    * if the file URL can't be formed
+    */
+   public static String MakeWriteURLString(String subfolder, String file) {
         URL url=MakeWriteURL(subfolder, file);
         if (url!=null)
             return url.toString();
         if (Dbg.ERROR) Dbg.print("RelFile:MakeWriteURLString(subfolder,file): null url"+subfolder+ ' ' +file);
         return null;
-    }
+   }
 
 
     /**
@@ -509,8 +504,7 @@ public final class RelFile
      * be formed
      */
     public static AudioClip MakeAudioClip(String folder, String subfolder,
-                                          String filename)
-    {
+                                          String filename) {
         AudioClip clip = null;
         if (applAudio) {
             // in Java 2 both applications and Applets can make audio clips (in any format) from this static method
@@ -543,13 +537,11 @@ public final class RelFile
      * filename (including the subfolder) specified, relative to the code base,
      * or the null if the current system can't play audio.
      */
-    public static AudioClip makeAudioClip(String subfolder, String filename)
-    {
+    public static AudioClip makeAudioClip(String subfolder, String filename) {
         return MakeAudioClip(null, subfolder, filename);
     }
 
-    public static AudioClip makeAudioClip(String filename, boolean dictSpecific)
-    {
+    public static AudioClip makeAudioClip(String filename, boolean dictSpecific) {
         if (dictSpecific){
             if (dictionaryDir==null)
                 return null;
@@ -579,8 +571,7 @@ public final class RelFile
      *    string was passed in in the first place
      */
     public static ImageIcon makeImageIcon(String folder, String subfolder,
-                                          String filename)
-    {
+                                          String filename) {
         if (filename == null) {
             return null;
         } else if (isApplet) {
@@ -609,8 +600,7 @@ public final class RelFile
      * filename (including the folder and subfolder) specified, relative to the code base,
      * or the null if the URL can't be formed
      */
-    public static ImageIcon makeImageIcon(String subfolder, String filename)
-    {
+    public static ImageIcon makeImageIcon(String subfolder, String filename) {
         return makeImageIcon(null, subfolder, filename);
     }
 
@@ -645,8 +635,7 @@ public final class RelFile
      *  in that directory (if they dont already exist), otherwise
      *  keeps the current temp directory.
      */
-    public static void editWriteDirectory()
-    {
+    public static void editWriteDirectory() {
         /* wdd = new WriteDirectoryDialog();
            wdd.setVisible(true);
         */
@@ -884,7 +873,6 @@ public final class RelFile
         return html;
     }
 
-
     public static void dumpSystemInfo() {
         Dbg.print("Running on system name: " +
                 System.getProperty("os.name") + ", arch: " +
@@ -895,6 +883,7 @@ public final class RelFile
         Dbg.print("  Helper.onClassicMac() " + Helper.onClassicMac() +
 		  "; Helper.onMacOSX() " + Helper.onMacOSX());
     }
+
 }
 
 

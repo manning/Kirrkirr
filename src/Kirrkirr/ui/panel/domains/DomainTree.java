@@ -10,7 +10,10 @@ import org.w3c.dom.Node;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -18,7 +21,10 @@ import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Vector;
 
 
 public class DomainTree extends JComponent implements Runnable {
@@ -58,7 +64,7 @@ public class DomainTree extends JComponent implements Runnable {
     private NewSemanticPanel nsp;
 
     private Vector trackers; // related to PositionTracker
-    final DefaultListModel<Domain> hierarchy, children;  // used in PositionTracker
+    final DefaultListModel hierarchy, children;  // used in PositionTracker
 
     private int mouseX, mouseY; // position of mouse in display
 
@@ -69,7 +75,7 @@ public class DomainTree extends JComponent implements Runnable {
 
     private boolean zooming; // = false;
 
-    private final Vector zoomQueue;
+    private final Vector<Domain> zoomQueue;
     private final Object zoomQueueLock;
 
     // todo: Fix this to use uniqueKey internally
@@ -115,7 +121,7 @@ public class DomainTree extends JComponent implements Runnable {
         zoomStep = 0;
 
         hierarchy = new DefaultListModel();
-        children = new DefaultListModel<Domain>();
+        children = new DefaultListModel();
         // this.myParent = myParent;
 
         setDoubleBuffered(false);   // cdm: suspicious??
@@ -135,6 +141,7 @@ public class DomainTree extends JComponent implements Runnable {
      *  Answer: at the start, yes, but not after we zoom, but it's not yet
      *  clear to me whether this is or isn't the source of subsequent problems....
      */
+    @Override
     public void setBounds(int X, int Y, int W, int H) {
         if (Dbg.DOMAINS) {
             Dbg.print("DomainTree.setBounds(X=" + X + ", Y=" + Y + ", W=" + W + ", H=" + H + ")");
@@ -214,6 +221,7 @@ public class DomainTree extends JComponent implements Runnable {
     }
 
 
+    @Override
     public void paintComponent(Graphics g) {
         long startTime = System.currentTimeMillis();
         if (Dbg.DOMAINS2) {
@@ -368,6 +376,7 @@ public class DomainTree extends JComponent implements Runnable {
 
 
     /** This is for the thread that animates the main domains display. */
+    @Override
     public void run() {
         try {
             while ( ! runner.isInterrupted()) {
@@ -440,16 +449,15 @@ public class DomainTree extends JComponent implements Runnable {
         //we copy the children so that we may sort them however we wish
         //without affecting the display order
 
-        Vector curChildren = parent.getChildrenVector();
+        List<Domain> curChildren = parent.getChildren();
         if (curChildren == null) return;
         Domain[] childArray = new Domain[curChildren.size()];
-        curChildren.copyInto(childArray);
+        curChildren.toArray(childArray);
 
         Arrays.sort(childArray, new DomainSorter());
 
         //populate list model
-        for (int i = 0; i < childArray.length; i++) {
-            Domain child = childArray[i];
+        for (Domain child : childArray) {
             children.addElement(child);
         }
     }
@@ -646,6 +654,7 @@ public class DomainTree extends JComponent implements Runnable {
         content.add(mainPane,BorderLayout.CENTER);
 
         mainFrame.addWindowListener(new WindowAdapter() {
+                @Override
                 public void windowClosing(WindowEvent e) {
                     System.exit(0);
                 }});
@@ -667,19 +676,23 @@ public class DomainTree extends JComponent implements Runnable {
 
         private Domain graspedDomain;
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             Domain t = target.click(e.getX(),e.getY());
             if (t != null) t.moveToFront();
             zoomTo(t, true);
         }
 
+        @Override
         public void mouseMoved(MouseEvent e) {
             mouseX = e.getX();
             mouseY = e.getY();
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {}
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             graspedDomain = target.click(e.getX(), e.getY());
             if (graspedDomain != null) {
@@ -687,6 +700,7 @@ public class DomainTree extends JComponent implements Runnable {
             }
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
             // We should move it, but we don't yet.
             // Some tricky calculations to do!
@@ -725,7 +739,9 @@ public class DomainTree extends JComponent implements Runnable {
             */
         }
 
+        @Override
         public void mouseEntered(MouseEvent e) {}
+        @Override
         public void mouseExited(MouseEvent e) {}
 
     } // end class DomainMouseInputAdapter
@@ -739,6 +755,7 @@ public class DomainTree extends JComponent implements Runnable {
         public DomainSorter() {
             alphaComp = new KAlphaComparator();
         }
+        @Override
         public int compare(Domain a, Domain b) {
             return compareTwo(a, b);
         }
@@ -779,6 +796,7 @@ public class DomainTree extends JComponent implements Runnable {
             parentDomain = parentDom;
         }
 
+        @Override
         public void run() {
             parentDomain.getImages(nsp.parent.cache, this, showPicsOnly);
         }

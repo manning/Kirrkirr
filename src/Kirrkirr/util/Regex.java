@@ -1,11 +1,14 @@
 package Kirrkirr.util;
 
 /**
- * The <code>Regex</code> interface is a simple interface that can make
- * other regular expression classes a bit easier to use.
- * (Historically, it is based on the original patbin interface, and has 
- * since been used with the gnu regexp package and Jakarta-ORO.
- *
+ * The <code>Regex</code> interface is a simple interface that can abstract
+ * away a particular regular expression library.
+ * (Historically, it is based on the original patbin interface, and was
+ * then used with the gnu regexp package and Jakarta-ORO.
+ * Of course, these days this library and everyone else uses
+ * java.util.regex, but we're still mainly working through this.
+ * We'll be ready for the 22nd century regex library
+ * <p>
  * An interface cannot specify constructors, but the file notes the 
  * constructors that one would normally expect to be available in an 
  * implementing class.

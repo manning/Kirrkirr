@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-/** <code>KirrkirrPanel</code> is the abstract superclass for all of
+/** {@code KirrkirrPanel} is the abstract superclass for all of
  *  the panels in the tabbed panes. It provides a useful template
  *  for communication between the Kirrkirr class and the Panels.
- *  The only required functions are <code>setCurrentWord</code>, which
+ *  The only required functions are {@code setCurrentWord}, which
  *  tells the panel that the user has picked a new word, and
- *  <code>getTabRollover</code>, to give tooltip descriptions of the tabbed
- *  panes.
+ *  {@code getTabRollover}, to give tooltip descriptions of the tabbed panes.
  */
 public abstract class KirrkirrPanel extends JPanel
 {
@@ -40,10 +39,15 @@ public abstract class KirrkirrPanel extends JPanel
      */
     public static final int NORMAL = 2;
 
-  /** A constant to define large screens on which you can use big
-   *  stuff.  Let's say 1600x1200 and up.
-   */
+    /** A constant to define large screens on which you can use big
+     *  stuff.  Let's say 1920x1080 or 2560x1440.
+     */
     public static final int LARGE = 3;
+
+    /** A constant to define very large screens.
+     *  Let's say that's 3500x2000 and up. Commonly it's 4K monitors at 840x2160.
+     */
+    public static final int HUGE = 4;
 
     /** a pointer to Kirrkirr */
     public Kirrkirr parent;
@@ -55,20 +59,20 @@ public abstract class KirrkirrPanel extends JPanel
      *  @param kkparent The parent panel
      */
     public KirrkirrPanel(Kirrkirr kkparent) {
-	this.parent = kkparent;
+        this.parent = kkparent;
     }
 
     /** Just sets the main Kirrkirr JFrame (for opening dialogs).
      */
     public KirrkirrPanel(JFrame window) {
-	this.window = window;
+        this.window = window;
     }
 
     /** Sets the parent and main Kirrkirr JFrame (for opening dialogs).
      */
     public KirrkirrPanel(Kirrkirr kkparent, JFrame window) {
-	this.window = window;
-	this.parent = kkparent;
+        this.window = window;
+        this.parent = kkparent;
     }
 
     /** Returns the main Kirrkirr frame.
@@ -84,9 +88,9 @@ public abstract class KirrkirrPanel extends JPanel
      *  checking the signaller)
      */
     public abstract void setCurrentWord(/* padded */ String tailWord,
-                        boolean gloss,
-    			final JComponent signaller, final int signallerType,
-			final int arg);
+                                                     boolean gloss,
+                                                     final JComponent signaller, final int signallerType,
+                                                     final int arg);
 
 
     /** Called by Kirrkirr when the user clicks "switch to headword"

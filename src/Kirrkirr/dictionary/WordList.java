@@ -36,7 +36,7 @@ public abstract class WordList {
      */
     protected KKListModel<String> words;
     /** Swing component for list of words. */
-    public JList<String> jWords;
+    public JList jWords;
     /** list listener (so that we can remove and re-add when highlighting) */
     protected ListSelectionListener listener;
     /** Swing scroll pane to hold the list of words */
@@ -57,16 +57,16 @@ public abstract class WordList {
      *  and sets it to make subwords visible by default
      *  (and frequency and parts of speech not visible).
      */
-    public WordList(ListCellRenderer<String> renderer, Kirrkirr p, ScrollPanel sp,
+    public WordList(ListCellRenderer renderer, Kirrkirr p, ScrollPanel sp,
                     int size, String implementationString) {
         parent = p;
         scrollPanel = sp;
         debug = implementationString;
 
         this.renderer = renderer;
-        words = new KKListModel<>();
+        words = new KKListModel<String>();
 
-        jWords = new JList<>(words);
+        jWords = new JList(words);
         jWords.setCellRenderer(renderer);
         jWords.setPrototypeCellValue(PROTOTYPE_CELL);
 
@@ -285,9 +285,9 @@ public abstract class WordList {
     public void highlightInWordList(int[] indices){
         jWords.setSelectedIndices(indices);
         if (indices.length > 0) {
-            StringBuffer b = new StringBuffer(24);
+            StringBuilder b = new StringBuilder(24);
             b.append(Integer.toString(indices.length));
-            b.append(" ");
+            b.append(' ');
             if (indices.length == 1) {
                 b.append(Helper.getTranslation(SC_WORD_HIGHLIGHTED));
             } else {
@@ -343,7 +343,7 @@ public abstract class WordList {
             if (selections1Empty) {
                 if (regex2.hasMatch(curword)) {
                     if (Dbg.VERBOSE) Dbg.print("Matched: "+regex2.toString()+" <with> "+words.elementAt(i));
-                    Object obj = new Integer(i);
+                    Object obj = Integer.valueOf(i);
                     if (filter) obj=curword;
                     selections2.addElement(obj);
                     if (regex1.hasMatch(curword)) {
@@ -419,7 +419,7 @@ public abstract class WordList {
         //(due to the numbers). There is some support for it
         //in the java internationalization stuff, but it is
         //somewhat complicated.
-        StringBuffer b = new StringBuffer(Integer.toString(newsize));
+        StringBuilder b = new StringBuilder(Integer.toString(newsize));
         b.append(" word");
         if(newsize != 1) {
             b.append("s");
@@ -445,7 +445,7 @@ public abstract class WordList {
      */
     public void resetWords(String[] selections) {
         if (Dbg.LIST) Dbg.print(debug+"resetwords(object[])");
-        Vector<String> newone=new Vector<>(selections.length);
+        Vector<String> newone=new Vector<String>(selections.length);
         for (String selection : selections) {
             newone.addElement(selection);
         }
@@ -480,14 +480,15 @@ public abstract class WordList {
      *  attribute changes. Unlike reset, this *tries* to
      *  just change the view of the list (ie, so you see
      *  the frequency or part of speech, etc).
-     *  <p>However, this *may* end up
+     *  <p>
+     *  However, this *may* end up
      *  resetting the list, and losing any filtering. For
      *  example, if you filter the list, hide subwords,
      *  then show subwords, the list must be reset.
      *  Other options: 1) give a warning dialog, 2) blank out
      *  see subwords option when list is filtered, 3) somehow
      *  keep track of which subwords are attached to which
-     *  mainwords (more overhead - like gloss). </p>
+     *  mainwords (more overhead - like gloss).
      */
     public abstract void refreshWords(int attributeChanged);
 

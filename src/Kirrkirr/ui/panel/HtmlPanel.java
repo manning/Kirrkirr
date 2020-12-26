@@ -50,14 +50,14 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
     /** Whether or not to update the page (used by gloss scroll list).
         Static so that both htmlpanels are frozen
         (see freeze and unfreeze methods). */
-    private static boolean frozen=false;
+    private static boolean frozen; // = false;
 
     // these next 2 vars always set on object creation
     // -- should be "blank final" but JDK1.2.2 has problems with them
     /** Where the html files are (mirrors Kirrkirr.htmlDirectory */
-    private String htmlDirectory;
+    private final String htmlDirectory;
     /** Listener to the html link clicks (Kirrkirr) */
-    private HtmlListener listener;
+    private final HtmlListener listener;
 
     // /** The current url being displayed by the html pane */
     // private URL currentURL;
@@ -147,10 +147,12 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
         setCurrentWord(uniqueKey, true);
     }
 
+    @Override
     public Dimension getMinimumSize() {
         return minimumSize;
     }
 
+    @Override
     public Dimension getPreferredSize() {
         return minimumSize;
     }
@@ -181,6 +183,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
      * For tooltips.
      * @return a description of the panel for tooltip rollovers
      */
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_HTML_ROLLOVER);
     }
@@ -221,11 +224,12 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
      *  Kirrkirr, and so doesn't distinguish frames...
      *  @see Kirrkirr#setCurrentWord(String,boolean,JComponent,int,int)
      */
+    @Override
     public void setCurrentWord(String uniqueKey, boolean gloss,
-                        final JComponent signaller, final int signallerType,
-                        final int arg) {
+                               final JComponent signaller, final int signallerType,
+                               final int arg) {
         if (Dbg.HTML_PANEL) Dbg.print("HtmlPanel.setCurrentWord(" + uniqueKey +
-                "," + gloss + ") frozen is " + frozen);
+                ',' + gloss + ") frozen is " + frozen);
         // if ( ! (signallerType == parent.HTML && signaller != this)) {
         if (!frozen) {
             boolean gotHtml = false;
@@ -343,6 +347,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
 
     /** Returns an XslChoicePanel. Overrides KirrkirrPanel.
      */
+    @Override
     public KirrkirrOptionPanel getOptionPanel () {
         return(new XslOptionPanel(parent));
     }
@@ -437,7 +442,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
     }
 
 
-    private void playAudio(String filename) {
+    private static void playAudio(String filename) {
         if (Dbg.HTML_PANEL) Dbg.print("clicked on audio file: "+filename);
         if (RelFile.canMakeAudioClip()) {
             AudioClip currentClip = RelFile.makeAudioClip(filename, true);
@@ -479,10 +484,9 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
      *   back to a normal cursor.
      */
     class PageLoader implements Runnable {
-        private URL url;
-        private Cursor cursor;
 
-        PageLoader() {}
+        private URL url;
+        private final Cursor cursor;
 
         PageLoader(URL u, Cursor c, int h) {
             url = u;
@@ -493,6 +497,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
             run();
         }
 
+        @Override
         public synchronized void run() {
             if (url == null) {
                 // restore the original cursor
@@ -504,7 +509,6 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
                     htmlPane.setCursor(Cursor.getDefaultCursor());
                 }
                 //Container parent = htmlPane.getParent();
-                htmlparent.repaint();
             } else {
 
                 Document doc = htmlPane.getDocument();
@@ -534,7 +538,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
                     //vp.setViewPosition(new Point(0, height));
                 } catch (NullPointerException npe) {
                     if (Dbg.ERROR) {
-                        Dbg.print("Broken HTML load: Url was: |" + url + "|");
+                        Dbg.print("Broken HTML load: Url was: |" + url + '|');
                         npe.printStackTrace();
                     }
                     try {
@@ -564,8 +568,8 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
                     url = null;
                     SwingUtilities.invokeLater(this);
                 }
-                htmlparent.repaint();
             } //end of else
+            htmlparent.repaint();
         } //end of run
 
      } //end class PageLoader

@@ -4165,14 +4165,17 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
          *
          */
 
+        @Override
         public void totalStepsForPass(int nSteps) {
             progressBar.setMaximum(nSteps);
         }
 
+        @Override
         public void stepsDone(int nStepsDone) {
             progressBar.setValue(nStepsDone);
         }
 
+        @Override
         public void passDone() {
             ++curStage;  //move to next Stage
 
@@ -4189,6 +4192,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             }
         }
 
+        @Override
         public void maybeDispose() {
             if (!doneDispose) {
                 dispose(); //all done

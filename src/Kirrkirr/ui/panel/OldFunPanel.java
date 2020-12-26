@@ -79,7 +79,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
     private static final int textX = boxX + boxW + hspace;
 
     //FunPanel variables
-    private OldGraphPanel graph;
+    private final OldGraphPanel graph;
 
     private int numNodes; // number of nodes on graph in nodes[0, ..., numNodes-1]
     private WordNode[] nodes = new WordNode[MAX_NODES]; //accessed by WordNode, Kirrkirr, GraphPanel
@@ -88,7 +88,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
     private FunPanelEdge[] edges = new FunPanelEdge[MAX_EDGES];
 
     public int Q_SIZE = 5; //accessed by GraphPanel
-    private Vector<String> focusNodes = new Vector<>(Q_SIZE+10);   // list of unique keys
+    private Vector<String> focusNodes = new Vector<String>(Q_SIZE+10);   // list of unique keys
     public Hashtable hideEdge = new Hashtable(5); //accessed by GraphPanel
 
     private transient volatile Thread relaxer=null;
@@ -151,7 +151,6 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
             funfont = FontProvider.HUGE_WORD_FONT;
             superscript = FontProvider.WORD_LIST_FONT;
             legendfont = FontProvider.TEXT_FONT;
-
         }
     }
 
@@ -469,7 +468,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
         stop = true;
         pausePaint = true;
 
-        Vector<WordNode> keep = new Vector<>(MAX_NODES);          //vector of kept nodes
+        Vector<WordNode> keep = new Vector<WordNode>(MAX_NODES);          //vector of kept nodes
         int target=numNodes;
 
         for (int i=0 ; i<numNodes ; i++) {
@@ -591,7 +590,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
 */
 
         if (Dbg.NETWORK) Dbg.print("removeNode: " + lbl + " from " + focusNodes);
-        Vector<WordNode> keep = new Vector<>(MAX_NODES);          // vector of kept nodes
+        Vector<WordNode> keep = new Vector<WordNode>(MAX_NODES);          // vector of kept nodes
         int target = numNodes;
 
         for (int i = 0 ; i < numNodes; i++) {
@@ -725,7 +724,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
      *   @param backwardList - the backwardList
      *   @param word - the target word
      */
-    private synchronized void removeNodeEdges(Vector keep, int target,
+    private synchronized void removeNodeEdges(Vector<WordNode> keep, int target,
                                               boolean focus,
                                            Vector backwardList, String word) {
         FunPanelEdge[] t_edges = new FunPanelEdge[numEdges];  //kept edges
@@ -763,10 +762,10 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
         numNodes = keep.size();
         numEdges = 0;
 
-        Iterator iterator = keep.iterator();
+        Iterator<WordNode> iterator = keep.iterator();
         for (int i=0 ; i<MAX_NODES ; i++ ) {
             if (iterator.hasNext()) {
-                nodes[i] = (WordNode) iterator.next();
+                nodes[i] = iterator.next();
                 nodes[i].ptr = 0;
             } else {
                 nodes[i] = null;
@@ -1066,6 +1065,42 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
         }
     }
 
+    /** Draws a legend in the top right. We assume we are drawing in an empty canvas. */
+    private void drawLegend(Graphics g) {
+        // g.setColor(getBackground());
+        // g.fillRect(0, 0, w, h);
+
+        g.setFont(legendfont);
+        FontMetrics fm = g.getFontMetrics(legendfont);
+
+        int rowH = fm.getHeight();
+        int boxH = rowH / 2;
+        int maxText = 0;
+        int rowY = vspace;
+
+        DictionaryInfo dictInfo = Kirrkirr.dictInfo;
+        int numLinks = dictInfo.getNumLinks();
+        for (int i = 0; i < numLinks; i++) {
+            String desc = Helper.getTranslation(dictInfo.getLinkName(i));
+            g.setColor(dictInfo.getLinkColor(i));
+            g.fillRect(boxX + 1, rowY + (rowH - boxH)/2 + 1, boxW, boxH);
+            g.setColor(Color.black);
+            g.drawString(desc,textX + 1, rowY + (3 * rowH) / 4 + 1);
+            maxText = Math.max(maxText, fm.stringWidth(desc));
+            rowY += (rowH + vspace);
+        }
+
+        g.setColor(Color.black);
+        g.drawRect(1, 1, boxX + boxW + hspace + maxText + vspace + 1, rowY + 1);
+    }
+
+/*
+
+        if (legend) {
+            drawLegend(offgraphics);
+            offgraphics.drawImage(getLegendImage(), 1, 1, null);
+        }
+
     private Image getLegendImage() {
         if (legendImage == null) {
             legendImage = createImage(w, h);
@@ -1103,6 +1138,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
         }
         return legendImage;
     }
+*/
 
     @Override
     public void paint(Graphics g) {
@@ -1117,15 +1153,24 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
             offgraphics.setFont(getFont());
         }
 
+        // You desperately need font rendering hints in JDK 7+
+        Map<?, ?> desktopHints = (Map<?, ?>)
+                Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+        Graphics2D offg2d = (Graphics2D) offgraphics;
+        if (desktopHints != null) {
+            offg2d.setRenderingHints(desktopHints);
+        }
+
         offgraphics.setColor(getBackground());
         offgraphics.fillRect(0, 0, d.width, d.height);
         if (legend) {
-            offgraphics.drawImage(getLegendImage(), 1, 1, null);
+            drawLegend(offgraphics);
+            // offgraphics.drawImage(getLegendImage(), 1, 1, null);
         }
 
         for (int i = 0 ; i < numEdges ; i++) {
             FunPanelEdge e = edges[i];
-            if( hideEdge.containsKey(new Short(e.tag)) ) {
+            if (hideEdge.containsKey(Short.valueOf(e.tag))) {
                 nodes[e.from].colourPtr++;
                 nodes[e.to].colourPtr++;
                 continue;                   //don't draw the edge
@@ -1208,7 +1253,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
     }
 
     //Madhu:'00 just deletes the node connected to the main word (for WordGame)
-    private synchronized void removeNodeEdgesForGame(Vector keep, int target, boolean focus) {
+    private synchronized void removeNodeEdgesForGame(Vector<WordNode> keep, int target, boolean focus) {
         FunPanelEdge[] t_edges = new FunPanelEdge[numEdges];  //kept edges
 
         int j=0;
@@ -1238,7 +1283,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
 
         DictField to = new DictField();
         for (int i=0 ; i<MAX_EDGES ; i++) {
-            if (i<j) {
+            if (i < j) {
                 to.uniqueKey = t_edges[i].sTo;
                 to.tag = t_edges[i].tag;
                 addEdge(t_edges[i].sFrom, to, 0.0, 0.0);
@@ -1255,7 +1300,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
         boolean temp_pause = pausePaint;
         stop = true;
         pausePaint = true;
-        Vector keep = new Vector(MAX_NODES);          // vector of kept nodes
+        Vector<WordNode> keep = new Vector<>(MAX_NODES);          // vector of kept nodes
         int target=numNodes;
 
         for(int i=0 ; i<numNodes ; i++) {
@@ -1329,24 +1374,13 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
 
 
     private final class FunPanelMouseListener extends MouseAdapter
-               implements Serializable, MouseMotionListener, ActionListener
-    {
+               implements Serializable, ActionListener {
 
         @Override
-        public void mousePressed (MouseEvent e)
-        {
+        public void mousePressed (MouseEvent e) {
             int x = e.getX();
             int y = e.getY();
 
-            // try {
-            //Dbg.print(XmlFind.makeAbsoluteURL(clickSOUND));
-            //graph.play(new URL(XmlFind.makeAbsoluteURL(clickSOUND)) );
-            //AudioClip ply = graph.getAudioClip(new URL(XmlFind.makeAbsoluteURL(clickSOUND)));
-            //ply.play();     //Play it once.
-            // } catch (Exception excep) {
-            // Dbg.print("no luck: "+excep);
-            //  excep.printStackTrace();
-            // }
             double bestdist = Double.MAX_VALUE;
             pick = null;
             for (int i = 0 ; i < numNodes ; i++) {
@@ -1386,7 +1420,7 @@ public final class OldFunPanel extends JPanel implements Runnable /*, Serializab
             }
             if (e.isPopupTrigger()) {
                 showMyPopup(x, y);
-            } else if ((e.getModifiers() & InputEvent.BUTTON1_MASK) != 0) {
+            } else if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
                 triggerFunEvent(FIND);
             }
         }

@@ -26,6 +26,7 @@ public class KirrkirrApplet extends JApplet implements ActionListener
 
     private static final String INTRO_CLIP = "gong.au";
 
+    @Override
     public void init() {
         RelFile.Init(this.getCodeBase());     // set base for file access
         go = new JButton(RelFile.makeImageIcon("loading.jpg",false));
@@ -45,6 +46,7 @@ public class KirrkirrApplet extends JApplet implements ActionListener
         setVisible(true);
     }
 
+    @Override
     public void start()
     {
         xmlFile = RelFile.MakeURLString(xmlFile);
@@ -61,6 +63,7 @@ public class KirrkirrApplet extends JApplet implements ActionListener
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
         if (e.getSource() == go) {

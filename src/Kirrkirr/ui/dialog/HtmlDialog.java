@@ -9,6 +9,10 @@ import Kirrkirr.util.Helper;
 import Kirrkirr.util.RelFile;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,8 +22,9 @@ import java.util.*;
 /** HtmlDialog - displays the formatted html + notes for the current word in
  *  a separate JFrame.
  */
-public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
-{
+public class HtmlDialog extends JFrame
+        implements HtmlListener, ActionListener, HyperlinkListener {
+
     private static final String SC_NOTES_TITLE="Dictionary_Entry_And_Notes";
     private static final String SC_DEFAULT_TITLE="Dictionary_Entry";
     private static final String SC_CLOSE="Close";
@@ -33,25 +38,27 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
     public static final int NO_NOTES = 1;
     public static final int NOTES = 2;
 
-    private HtmlPanel    htmlGloss; // = null;
+    private final HtmlPanel    htmlGloss; // = null;
     private NotesPanel   textNotes;
-    private String current;
-    private boolean notes;
+    private final String current;
+    private final boolean notes;
     private static Kirrkirr parent;
-    private JButton close;
-    private JButton b_forward;
-    private JButton b_back;
-    private JButton b_copy;
-    private JButton b_keep;
-    private Vector history;
+    private final JButton close;
+    private final JButton b_forward;
+    private final JButton b_back;
+    private final JButton b_copy;
+    private final JButton b_keep;
+    private final Vector<String> history;
     private int currentPlace;
 
-    private final static Dimension minimumSize = new Dimension(500, 380);
+    private static final Dimension minimumSize = new Dimension(500, 380);
 
+    @Override
     public Dimension getMinimumSize() {
         return minimumSize;
     }
 
+    @Override
     public Dimension getPreferredSize() {
         return minimumSize;
     }
@@ -87,7 +94,7 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
 
 	current = uniqueKey;
         currentPlace = 0;
-        history = new Vector();
+        history = new Vector<>();
         history.addElement(current);
 
         // show the frame; assume a screen size of at least 600x400
@@ -197,6 +204,7 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
     }
 
 
+    @Override
     public void actionPerformed(ActionEvent e)
     {
 	Object obj = e.getSource();
@@ -209,9 +217,7 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
                 currentPlace++;
                 setCurrentWord((String)history.elementAt(currentPlace));
 	    }
-            if (!((currentPlace+1) < history.size()))
-              b_forward.setEnabled(false);
-            else b_forward.setEnabled(true);
+            b_forward.setEnabled((currentPlace + 1) < history.size());
 
         } else if (obj == b_back) {
 
@@ -219,9 +225,7 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
                 currentPlace--;
                 setCurrentWord((String)history.elementAt(currentPlace));
 	    }
-            if (currentPlace > 0)
-              b_back.setEnabled(true);
-            else b_back.setEnabled(false);
+            b_back.setEnabled(currentPlace > 0);
 
         } else if (obj == b_copy) {
             copyText();
@@ -262,16 +266,21 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
             history.addElement(word);
             currentPlace++;
 	}
-        if (!((currentPlace+1) < history.size()))
-              b_forward.setEnabled(false);
-        else b_forward.setEnabled(true);
-        if (currentPlace > 0)
-              b_back.setEnabled(true);
-        else b_back.setEnabled(false);
+        if (!((currentPlace+1) < history.size())) {
+            b_forward.setEnabled(false);
+        } else {
+            b_forward.setEnabled(true);
+        }
+        if (currentPlace > 0) {
+            b_back.setEnabled(true);
+        } else {
+            b_back.setEnabled(false);
+        }
    }
 
 
     /** implemented as part of the HtmlInterface */
+    @Override
     public void wordClicked(String uniqueKey, JComponent signaller) {
         currentPlace++;
         history.setSize(currentPlace); // trimming vector
@@ -307,6 +316,23 @@ public class HtmlDialog extends JFrame implements HtmlListener, ActionListener
             new HtmlDialog(parent, Kirrkirr.htmlFolder, current);
         } else {
             new HtmlDialog(parent, Kirrkirr.htmlFolder, NO_NOTES, current);
+        }
+    }
+
+    /** Handle hyperlink's being clicked. */
+    @Override
+    public void hyperlinkUpdate(HyperlinkEvent event) {
+        HyperlinkEvent.EventType eventType = event.getEventType();
+        if (eventType == HyperlinkEvent.EventType.ACTIVATED) {
+            if (event instanceof HTMLFrameHyperlinkEvent) {
+                HTMLFrameHyperlinkEvent linkEvent =
+                        (HTMLFrameHyperlinkEvent) event;
+                HTMLDocument document =
+                        (HTMLDocument) displayEditorPane.getDocument();
+                document.processHTMLFrameHyperlinkEvent(linkEvent);
+            } else {
+                showPage(event.getURL(), true);
+            }
         }
     }
 

@@ -8,14 +8,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 
 public class Domain {
 
+    // todo [cdm 2018]: Can we change the cells to JComponent so we can easily tooltip them? What does Jeff do in protovis?
+
     //----------------STATIC VARIABLES--------------------//
-    private static final float GVAL=-.0002f;
+    private static final float GVAL = -0.0002f;
     // static float G=.1f;
     private static final float REL_CNTR_X=.5f;
     private static final float REL_CNTR_Y=.5f;
@@ -42,7 +49,7 @@ public class Domain {
 
 
     //----------------PRIVATE VARIABLES---------------------//
-    protected Vector children;
+    private List<Domain> children;
     /** Final target color. */
     protected Color myColor;
     /** Current draw color of node. */
@@ -166,10 +173,13 @@ public class Domain {
         return myColor;
     }
 
+    private boolean haveChildren() {
+        return children!=null && ! children.isEmpty();
+    }
+
     public Domain randomChild() {
-        if (children!=null && !children.isEmpty()) {
-            return (Domain) children.elementAt(
-                               (int) (Math.random()*children.size()));
+        if (haveChildren()) {
+            return children.get((int) (Math.random()*children.size()));
         } else {
           return null;
         }
@@ -177,27 +187,25 @@ public class Domain {
 
     //  gives semantic domains precedent over words
     public Domain randomChildDomainPri() {
-        if (children!=null && children.size()>0) {
-        	Vector domains = new Vector();
-        	for (int i = 0; i < children.size(); i++) {
-        		Domain child = (Domain)children.elementAt(i);
-        		Vector grandkids = child.getChildrenVector();
-        		if (grandkids!=null && grandkids.size()>0)
-        			domains.addElement(child);
-        	}
-        	if (domains.size() > 0)
-        		return (Domain)domains.elementAt(
-        				(int) (Math.random()*domains.size()));
-            else
-            	return (Domain) children.elementAt(
-                               (int) (Math.random()*children.size()));
+        if (haveChildren()) {
+            ArrayList<Domain> domains = new ArrayList<Domain>();
+            for (Domain child : children) {
+                List grandkids = child.getChildren();
+                if (grandkids != null && !grandkids.isEmpty()) {
+                    domains.add(child);
+                }
+            }
+            if ( ! domains.isEmpty()) {
+                return domains.get((int) (Math.random() * domains.size()));
+            } else {
+                return children.get((int) (Math.random() * children.size()));
+            }
         } else {
-          return null;
+            return null;
         }
     }
 
-    public Domain click(int scrXClick, int scrYClick)
-    {
+    public Domain click(int scrXClick, int scrYClick) {
         if (!contains(scrXClick,scrYClick)) return parent;
         if (children==null) return this;
         int nChildren = children.size();
@@ -205,7 +213,7 @@ public class Domain {
         //search through visible domains
 
         for (int i=nChildren-1;i>=childCutoffIndex;i--){
-            Domain target = ((Domain) children.elementAt(i));
+            Domain target = children.get(i);
             if (target.contains(scrXClick,scrYClick))
                 return target;
         }
@@ -213,16 +221,14 @@ public class Domain {
     }
 
 
-    public boolean contains(int scrX1, int scrY1)
-    {
+    public boolean contains(int scrX1, int scrY1) {
         float dx=(scrX1-scrX);
         float dy=(scrY1-scrY);
         float dsq=(dx*dx + dy*dy);
         return (dsq<(scrR*scrR));
     }
 
-    public boolean contained()
-    {
+    public boolean contained() {
         float dx=(relX-.5f);
         float dy=(relY-.5f);
         float dsq=(dx*dx+dy*dy);
@@ -290,8 +296,7 @@ public class Domain {
     }
 
 
-    public void doTimestep(int scrXmouse, int scrYmouse)
-    {
+    public void doTimestep(int scrXmouse, int scrYmouse) {
         if (children==null) return;  //could return false as an optimization?
 
         int n = children.size();
@@ -299,7 +304,7 @@ public class Domain {
 
         dtree.pinned = null; //reset pinned
         for (int i = n-1; i >= childCutoffIndex; i--) {
-            Domain kid = (Domain) children.elementAt(i);
+            Domain kid = (Domain) children.get(i);
             if (kid.contains(scrXmouse, scrYmouse)) {
                 dtree.pinned = kid;
                 break;
@@ -310,26 +315,26 @@ public class Domain {
 
         //go through each child
         for (int j=n-1; j>=childCutoffIndex; j--) { //only repel visible domains
-                Domain child = (Domain) children.elementAt(j);
+            Domain child = (Domain) children.get(j);
 
-                //apply gravity (repel from outside)
-                //likewise, more children -> more gravity
-                child.addGravity((n-childCutoffIndex)/20);
+            //apply gravity (repel from outside)
+            //likewise, more children -> more gravity
+            child.addGravity((n-childCutoffIndex)/20);
 
-                //repel from other nodes
-                for (int k=j-1;k>=childCutoffIndex;k--) {
-                    child.repel((Domain) children.elementAt(k),
-                                 strongRepel);
-                }
-
-                //if mouse over this domain, don't move
-                if(child == dtree.pinned)
-                    child.relDx = child.relDy = 0.0f;
-
-                child.synch(); //apply changes
+            //repel from other nodes
+            for (int k=j-1;k>=childCutoffIndex;k--) {
+                child.repel((Domain) children.get(k),
+                        strongRepel);
             }
+
+            //if mouse over this domain, don't move
+            if(child == dtree.pinned)
+                child.relDx = child.relDy = 0.0f;
+
+            child.synch(); //apply changes
+        }
         relDx = relDy = 0; //root shouldn't move at any time - will have
-                     //accumulated dx and dy through repulsion
+        //accumulated dx and dy through repulsion
 
         //if interrupted, clean up so that dx, dy are applied for all children
         //and we remain in a consistent state
@@ -337,8 +342,7 @@ public class Domain {
 
 
     /** Apply gravity to a domain and bring it back toward center */
-    public void addGravity(float scale)
-    {
+    public void addGravity(float scale) {
         float gravdx = (relX-REL_CNTR_X);
         float gravdy = (relY-REL_CNTR_Y);
         float radiusRatio = (float) Math.sqrt(.25f/(gravdx*gravdx+gravdy*gravdy));
@@ -354,7 +358,7 @@ public class Domain {
     //Repel two nodes - if either has mouse over it, will be increased by
     //factor of strength.
 
-    void repel(Domain d2, float strength) {
+    private void repel(Domain d2, float strength) {
         float dx1=(relX-d2.relX);
         float dy1=(relY-d2.relY);
         float distsq=(dx1*dx1 + dy1*dy1);
@@ -463,7 +467,7 @@ public class Domain {
         if (children!=null && scrR>dtree.drawCutoff) {
             int nChildren = children.size();
             for (int i=childCutoffIndex; i<nChildren; i++) {
-                ((Domain)children.elementAt(i)).draw(g, txt);
+                children.get(i).draw(g, txt);
             }
         }
 
@@ -501,7 +505,7 @@ public class Domain {
         if (children != null && scrR > dtree.drawCutoff) {
             int nChildren = children.size();
             for (int i=childCutoffIndex; i<nChildren; i++)
-                ((Domain)children.elementAt(i)).draw(g,false);
+                children.get(i).draw(g,false);
         }
         if (txt) drawText(g);
     }
@@ -543,7 +547,7 @@ public class Domain {
         }
 
         if (Dbg.DOMAINS2) {
-          if (text.equals("spatial") || text.equals("")) {
+          if (text.equals("spatial") || text.isEmpty()) {
             Dbg.print("Changed " + ("".equals(text) ? text: "ROOT") + " to scrX=" + scrX + " scrY=" + scrY + " scrR=" + scrR + " aspect=" + aspect);
             Dbg.print("  relR="+relR+" scrBoundW="+scrBoundW+ " scrBoundH="+scrBoundH);
           }
@@ -559,8 +563,9 @@ public class Domain {
         }
 
         if (children != null && scrR > dtree.drawCutoff) {
-            for (int i=0, csize = children.size(); i < csize; i++)
-                ((Domain)children.elementAt(i)).synch(scrX-scrR,scrY-(scrR/aspect),scrR*2,getScrH());
+            for (Domain child : children) {
+                child.synch(scrX - scrR, scrY - (scrR / aspect), scrR * 2, getScrH());
+            }
         }
     }
 
@@ -571,8 +576,8 @@ public class Domain {
         //probably still need synchro to ensure that operations that
         //temporarily cache children vector length don't occur in between
         //these ops if called on thread other than Swing thread
-        children.addElement(toMove);
-        children.removeElement(toMove);
+        children.add(toMove);
+        children.remove(toMove);
         findChildCutoff(false, dtree.childrenDrawingIsLimited());  //reset our child cutoff (without recursing)
     }
 
@@ -604,8 +609,7 @@ public class Domain {
         if (children == null) {
             return null;
         }
-        for (int i = 0, csize = children.size(); i < csize; i++) {
-            Domain child = (Domain) children.elementAt(i);
+        for (Domain child : children) {
             if (Dbg.DOMAINS) {
                 Dbg.print("  Comparing against " + child.getText());
             }
@@ -655,7 +659,7 @@ public class Domain {
         }
 
         int[] descendantArray = new int[nlLeng];
-        children = new Vector();
+        children = new ArrayList<Domain>();
         int cSize = 0;  // mirrors the size of children Vector
 
         for (int i = 0; i < nlLeng; i++) {
@@ -671,7 +675,7 @@ public class Domain {
                 // recurse.  add 1 to result for child node itself
                 int nDescendants = newD.getChildren((Element) n);
 
-                children.addElement(newD);
+                children.add(newD);
                 // testTarget=newD;
 
                 if (nDescendants > maxDesc) maxDesc = nDescendants;
@@ -691,7 +695,7 @@ public class Domain {
             }
 
             for (int j = 0; j < cSize; j++) {
-                Domain child = (Domain) children.elementAt(j);
+                Domain child = children.get(j);
 
                 // chris: this was a formula I came up with, but seems to work less well for modern big screens.
                 // 3 factors: a base size for all circles, a component based on number of children, and a component based on number of desscendants.
@@ -726,16 +730,15 @@ public class Domain {
     }
     */
 
-    static void populateZoomQueue(Vector zoomQueue, Domain currentDom, Domain goalDom) {
+    static void populateZoomQueue(Vector<Domain> zoomQueue, Domain currentDom, Domain goalDom) {
         //      System.out.println("popzq: cur: " + currentDom.getText() + " goal: " + goalDom.getText());
         if (!(goalDom.isWord() && currentDom == goalDom.parent)) {
             zoomQueue.removeAllElements();
         }
-        Vector currentDomainInfo = new Vector(); //list of domains (down to
-        Vector goalDomainInfo = new Vector();
-        Domain t1, t2;
-        t1 = currentDom;
-        t2 = goalDom;
+        Vector<Domain> currentDomainInfo = new Vector<>(); //list of domains (down to
+        Vector<Domain> goalDomainInfo = new Vector<>();
+        Domain t1 = currentDom;
+        Domain t2 = goalDom;
 
         while (t1 != null) {
             currentDomainInfo.insertElementAt(t1, 0);
@@ -762,7 +765,7 @@ public class Domain {
             zoomQueue.addElement(goalDomainInfo.elementAt(j)); //for zoom in
     }
 
-    public Vector getChildrenVector() { return children; }
+    public List<Domain> getChildren() { return children; }
 
     public void setSelected(boolean selected) { this.selected = selected; }
     public boolean isSelected() { return selected; }
@@ -785,7 +788,7 @@ public class Domain {
         int wordCount = 0;
         childCutoffIndex = 0;
         for(int i = nChildren-1; i >= 0; i--) {
-            Domain child = (Domain) children.elementAt(i);
+            Domain child = children.get(i);
             if(recurse)
                 child.findChildCutoff(true, applyLimits);
             if(applyLimits) {
@@ -807,7 +810,7 @@ public class Domain {
     public void resize(float factor) {
         if (Dbg.DOMAINS) {
             String name = getText();
-            if (name.equals("spatial") || name.equals("")) {
+            if (name.equals("spatial") || name.isEmpty()) {
                 Dbg.print("Node " + name + " under parent " +
                           (parent == null ? "NULL" : parent.getText()) +
                           " resized with factor " + factor +
@@ -820,8 +823,8 @@ public class Domain {
         // cdm jan 2005 fixes
         //         resizeChildren(factor);
         if (children == null) return;
-        for (int i = 0, nChildren = children.size(); i < nChildren; i++) {
-            ((Domain)children.elementAt(i)).resize(factor);
+        for (Domain child : children) {
+            child.resize(factor);
         }
     }
 
@@ -834,7 +837,7 @@ public class Domain {
 
         for (int i = childCutoffIndex; i < nChildren && !loaderThread.halted();
             i++) {
-            Domain child = (Domain) children.elementAt(i);
+            Domain child = children.get(i);
             if (child.isWord()) {
                 child.getImages(cache, loaderThread, showPicsOnly);
             }
@@ -852,7 +855,7 @@ public class Domain {
         if (children == null) return;
         int nChildren = children.size();
         for (int i = startIndex; i < nChildren; i++) {
-            Domain child = (Domain) children.elementAt(i);
+            Domain child = children.get(i);
             if (child.isWord()) {
                 child.removeImages();
             }

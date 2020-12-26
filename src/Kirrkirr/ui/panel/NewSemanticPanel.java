@@ -66,10 +66,11 @@ public class NewSemanticPanel extends KirrkirrPanel implements
 
 
     //the main part of the display
-    private DomainTree dt;  //the domain tree itself - null if none loaded
+    private final DomainTree dt;  //the domain tree itself - null if none loaded
 
     //buttons to facilitate zooming in/out
-    private JButton zIn, zOut;
+    private JButton zIn;
+    private final JButton zOut;
 
     //for gloss mode.  That is, for when in English -> L1 mode
     private String lastWord;  // = null;
@@ -78,7 +79,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
     //for sense panel
     private DefaultListModel senseModel;
     private JList senseList;
-    private Vector domainsEntries;
+    private Vector<Vector<String>> domainsEntries;
 
 
     public NewSemanticPanel(Kirrkirr kkparent, JFrame window, final int size,
