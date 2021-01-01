@@ -31,6 +31,7 @@ public class DomainOval extends Domain {
         g.fillOval((int)(scrX-scrR),(int)(scrY-(scrR/aspect)),(int)(scrR*2),(int)((scrR*2)/aspect));
     }
 
+    @Override
     public void drawText(Graphics g)
     {
         boolean scrolling = (textWidth > 2*scrR - 6);

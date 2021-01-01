@@ -111,7 +111,7 @@ public class IndexMaker {
             return;
         }
 
-        RelFile.Init("");
+        RelFile.init("");
         System.out.println("Welcome to IndexMaker");
         while ( ! done) {
             String reverseIndex = null;
@@ -1016,7 +1016,7 @@ public class IndexMaker {
                 // read until you reach the current startentry
                 // fpos is set _before_ reading line: points to beginning of it
                 if (startreg.hasMatch(line)) {
-                    fpositions.addElement(new Long(fpos));
+                    fpositions.addElement(Long.valueOf(fpos));
                     total++;
                     if (progressTracker != null && total % 100 == 0) {
                         //every hundred entries, update tracker

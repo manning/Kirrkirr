@@ -278,7 +278,7 @@ space and avoid unnecessary heap allocation.
     public void sortByColumn(int column, boolean ascending) {
         this.ascending = ascending;
         sortingColumns.removeAllElements();
-        sortingColumns.addElement(new Integer(column));
+        sortingColumns.addElement(Integer.valueOf(column));
         sort(this);
         super.tableChanged(new TableModelEvent(this)); 
     }
@@ -297,7 +297,7 @@ space and avoid unnecessary heap allocation.
                 int column = tableView.convertColumnIndexToModel(viewColumn); 
                 if(e.getClickCount() == 1 && column != -1) {
                     //System.out.println("Sorting ..."); 
-                    int shiftPressed = e.getModifiers()&InputEvent.SHIFT_MASK; 
+                    int shiftPressed = e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK;
                     boolean ascending = (shiftPressed == 0); 
                     sorter.sortByColumn(column, ascending); 
                 }

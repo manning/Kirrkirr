@@ -15,8 +15,11 @@ import java.io.ObjectOutputStream;
  *  tells the panel that the user has picked a new word, and
  *  {@code getTabRollover}, to give tooltip descriptions of the tabbed panes.
  */
-public abstract class KirrkirrPanel extends JPanel
-{
+public abstract class KirrkirrPanel extends JPanel {
+
+    // For a 2016 MacbookPro 15.4" with screen size 2880 x 1800, it reports:
+    // Screen size is java.awt.Dimension[width=1680,height=1050]
+    // I'm not sure why....
 
     /** A constant to define tiny tabbed panes.
      *  A tabbed pane is tiny, small, normal or large.
@@ -40,12 +43,12 @@ public abstract class KirrkirrPanel extends JPanel
     public static final int NORMAL = 2;
 
     /** A constant to define large screens on which you can use big
-     *  stuff.  Let's say 1920x1080 or 2560x1440.
+     *  stuff.  Let's say 1920x1080 or 2560x1440 or 2880x1800
      */
     public static final int LARGE = 3;
 
     /** A constant to define very large screens.
-     *  Let's say that's 3500x2000 and up. Commonly it's 4K monitors at 840x2160.
+     *  Let's say that's 3500x2000 and up. Commonly it's 4K monitors at 3840x2160.
      */
     public static final int HUGE = 4;
 
@@ -79,6 +82,19 @@ public abstract class KirrkirrPanel extends JPanel
      */
     public JFrame getMainFrame() {
         return window;
+    }
+
+
+    /** String form of size */
+    public static String panelSize(int size) {
+        switch(size) {
+            case 0: return "TINY";
+            case 1: return "SMALL";
+            case 2: return "NORMAL";
+            case 3: return "LARGE";
+            case 4: return "HUGE";
+            default: return "UNDEFINED";
+        }
     }
 
 
@@ -117,14 +133,14 @@ public abstract class KirrkirrPanel extends JPanel
     }
 
     /** Converts a panel from KirrkirrPanel.NORMAL to KirrkirrPanel.SMALL,
-     *  if overriden. A panel only overrides this function if it returns
+     *  if overridden. A panel only overrides this function if it returns
      *  true in isResizable().
      */
     public void makeSmall() {
     }
 
     /** Converts a panel from KirrkirrPanel.SMALL to KirrkirrPanel.NORMAL,
-     *  if overriden. A panel only overrides this function if it returns
+     *  if overridden. A panel only overrides this function if it returns
      *  true in isResizable().
      */
     public void makeNormal() {
@@ -170,7 +186,7 @@ public abstract class KirrkirrPanel extends JPanel
      *  The panel should return localized text.
      *  @return the string to be used as rollover text
      */
-    abstract public String getTabRollover();
+    public abstract String getTabRollover();
 
     /** Called when the current pane's tab is clicked on;
      *  used for semantic explorer, graph panel and quiz master
@@ -178,17 +194,21 @@ public abstract class KirrkirrPanel extends JPanel
      *  If the pane called is the top pane in Kirrkirr, toppane
      *  is true, but is no longer there. Should we reimplement?
      */
-    public void tabSelected(){}
+    public void tabSelected() {}
 
     /** Called when the current pane's tab is deselected;
      *  used for semantic explorer and graph panel
      */
     public void tabDeselected() {}
 
-    /** Called when pane needs to be restarted or stopped.  This only
+    /** Called when pane needs to be restarted.  This only
      *  needs to be implemented by panels that use auxiliary threads.
      */
     public void start() {}
+
+    /** Called when pane needs to be stopped.  This only
+     *  needs to be implemented by panels that use auxiliary threads.
+     */
     public void stop() {}
 
 }

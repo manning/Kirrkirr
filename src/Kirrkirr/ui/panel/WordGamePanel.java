@@ -473,9 +473,9 @@ public class WordGamePanel extends GamePlayPanel implements ActionListener
             int rnd = GameWordGenerator.randomInt(SC_GOOD_TXT.length);
             text = Helper.getTranslation(SC_GOOD_TXT[rnd]);
             numright++;
-            txtNumRight.setText((new Integer(numright)).toString());
+            txtNumRight.setText(Integer.valueOf(numright).toString());
             numTries=0;
-            txtCurQuest.setText((new Integer(curQuest)).toString());
+            txtCurQuest.setText(Integer.valueOf(curQuest).toString());
 
             WordRelation wr=(WordRelation)wordHash.get(clicked);
             wr.remove(mainWord);
@@ -618,7 +618,7 @@ public class WordGamePanel extends GamePlayPanel implements ActionListener
             {
                 giveupButton.setText(Helper.getTranslation(SC_GIVEUP_BUTTON));
                 giveupButton.setBackground(Color.gray.brighter());
-                txtCurQuest.setText((new Integer(curQuest)).toString());
+                txtCurQuest.setText(Integer.valueOf(curQuest).toString());
                 if (curQuest>=totalQuestions)
                     endOfGame();
                 else
@@ -630,7 +630,7 @@ public class WordGamePanel extends GamePlayPanel implements ActionListener
         wr.remove(mainWord);
         currentwordRel.remove(answer);
 
-        txtCurQuest.setText((new Integer(curQuest)).toString());
+        txtCurQuest.setText(Integer.valueOf(curQuest).toString());
         instrLabel.setText(Helper.getTranslation(SC_GIVEUP[curRelation])+" ");
         relationLabel.setText(Helper.getWord(mainWord)+": ");
         relationLabel.setForeground(Color.red.darker());

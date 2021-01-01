@@ -22,8 +22,8 @@ public class ProgressDialog extends JFrame {
 
     private static final String SPLASH_SCREEN_PICTURE = "splash.jpg";
 
-    private JLabel progressLabel;
-    private JProgressBar progressBar;
+    private final JLabel progressLabel;
+    private final JProgressBar progressBar;
     private final int max;
 
 
@@ -59,7 +59,7 @@ public class ProgressDialog extends JFrame {
         // Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         pack();
 
-        // show the frame
+        // show the frame in the center
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension frameSize = getPreferredSize();
         setBounds((screenSize.width - frameSize.width)/2,

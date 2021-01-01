@@ -2,6 +2,7 @@ package Kirrkirr.ui.dialog;
 
 import Kirrkirr.Kirrkirr;
 import Kirrkirr.ui.KirrkirrButton;
+import Kirrkirr.ui.panel.KirrkirrPanel;
 import Kirrkirr.util.Helper;
 import Kirrkirr.util.RelFile;
 
@@ -10,17 +11,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class PictureDialog extends JFrame implements ActionListener
-{
+
+public class PictureDialog extends JFrame implements ActionListener {
+
     private static final String SC_CLOSE="Close";
 
-    private static int MAX_WIDTH=640, MAX_HEIGHT=480;
+    private final int MAX_WIDTH;
+    private final int MAX_HEIGHT;
 
-    private static Kirrkirr parent;
-    private ImageIcon picture;
-    private JLabel pictLabel;
-    private JViewport pictVp;
-    private JButton close;
+    private final JLabel pictLabel;
+    private final JViewport pictVp;
+    private final JButton close;
 
     // private final static Dimension minimumSize = new Dimension(380, 500);
 
@@ -34,20 +35,32 @@ public class PictureDialog extends JFrame implements ActionListener
 
     public PictureDialog(Kirrkirr p, String filename, String word) {
         super();
-        parent = p;
-	setTitle(word);
+        setTitle(word);
 
         // show the frame
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	setLocation(screenSize.width/2 - 300 + (int) (Math.random()*40),
                     screenSize.height/2 - 200 + (int) (Math.random()*40));
 
+	if (p.kirrkirrSize >= KirrkirrPanel.LARGE) {
+            MAX_WIDTH = 800;
+            MAX_HEIGHT = 600;
+        } else {
+            MAX_WIDTH = 640;
+            MAX_HEIGHT = 480;
+        }
+
         WindowListener winlin = new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) { dispose(); }
         };
         addWindowListener(winlin);
 
-	setSize(380, 300);
+        if (p.kirrkirrSize >= KirrkirrPanel.LARGE) {
+            setSize(640, 480);
+        } else {
+            setSize(380, 300);
+        }
 
         JPanel butt_p = new JPanel();
         close = new KirrkirrButton(Helper.getTranslation(SC_CLOSE), this);
@@ -70,7 +83,7 @@ public class PictureDialog extends JFrame implements ActionListener
 	pictVp.setView(pictLabel);
 
 	Dimension d=setNewImage(filename);
-	if (d!=null) {
+	if (d != null) {
             setSize(d);
         }
         getContentPane().setLayout(new BorderLayout());
@@ -79,30 +92,31 @@ public class PictureDialog extends JFrame implements ActionListener
         setVisible(true);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == close) {
             dispose();
         }
     }
 
-    private Dimension setNewImage(String filename){
-	if(filename == null) {
+    private Dimension setNewImage(String filename) {
+	if (filename == null) {
 	    return null;
         }
 
-	picture = RelFile.makeImageIcon(filename,true);
+        ImageIcon picture = RelFile.makeImageIcon(filename, true);
         int height = picture.getIconHeight();
         int width = picture.getIconWidth();
 
         //System.out.println(height+" "+width+" "+pictVp.getWidth()+" "+pictVp.getHeight()+" "+pictVp.getViewPosition());
         int x = (width-pictVp.getWidth())/2;
         int y = (height-pictVp.getHeight())/2;
-	int tempx=width+40;
-	int tempy=height+90;
+	int tempx = width + 40;
+	int tempy = height + 90;
 	//System.err.println("x "+tempx+" y "+tempy);
 	if (tempx>MAX_WIDTH) tempx=MAX_WIDTH;
 	if (tempy>MAX_HEIGHT) tempy=MAX_HEIGHT;
-	Dimension d=new Dimension(tempx,tempy);
+	Dimension d = new Dimension(tempx,tempy);
 	if (x < 0)
 	    x = 0;
 	if (y < 0)

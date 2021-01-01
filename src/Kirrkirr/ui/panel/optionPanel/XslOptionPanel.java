@@ -11,7 +11,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 
-/** The <code>XslOptionPanel</code> object allows the user the option to choose
+/** The {@code XslOptionPanel} object allows the user the option to choose
  *  a different Xsl file to be used in the
  *  generation of the HTML dictionary entries
  *
@@ -91,10 +91,10 @@ public class XslOptionPanel extends KirrkirrOptionPanel
     private static String defaultFolder = "xsl";
 
 //     private JRadioButton xslFiles[] = new JRadioButton[XSLFILES];
-    private JRadioButton[] xslFiles;
+    private final JRadioButton[] xslFiles;
 
-    private JButton browse;
-    private JTextField txtFile;
+    private final JButton browse;
+    private final JTextField txtFile;
     private File fileBrowsed;
     //private static String fileBrowsedName;
 
@@ -206,7 +206,7 @@ public class XslOptionPanel extends KirrkirrOptionPanel
 		// if i is one of the user's own xsl files then, MakeWriteURLString
 		Helper.setCursor(kirr, true);
 		//Madhu:'00, any xsl file can be chosen by the user
-		if (i == otherFileOption  && fileBrowsed != null){
+		if (i == otherFileOption  && fileBrowsed != null) {
 		    xslFolder = "file:" + fileBrowsed.getAbsolutePath();
 		    fileNames[otherFileOption] = fileBrowsed.getName();
 		    //parent.cache.xslChanged("","");//error checking!
@@ -227,14 +227,17 @@ public class XslOptionPanel extends KirrkirrOptionPanel
         }
     }
 
+    @Override
     public String getToolTip() {
 	return SC_DESC;
     }
 
+    @Override
     public void cancel() {
         setOption(previousOption);
     }
 
+    @Override
     public void defaults() {
         setOption(defaultOption);
     }
@@ -250,6 +253,7 @@ public class XslOptionPanel extends KirrkirrOptionPanel
     }
 
    //Madhu:'00 for selection of any other XSL file from the user's system
+   @Override
    public void actionPerformed(ActionEvent e){
        Object src = e.getSource();
 

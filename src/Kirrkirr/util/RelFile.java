@@ -6,8 +6,12 @@ import java.net.*;
 import java.io.*;
 import java.lang.reflect.*;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
-import java.applet.*;
+
 
 /** This is a small static class that is just meant to clean up
  *  file access in older code.  The idea is that it gets at files
@@ -39,8 +43,6 @@ public final class RelFile {
     private static String codeBaseStr; // = null;
     private static URL codeBase; // = null;
     public static String WRITE_DIRECTORY; // = null;
-    private static boolean applAudio; // = false;
-    // this is true if application is capable of playing audio
     private static final String[] htmlCreators = {"MOSS","MSIE"}; //MOSS is netscape; MSIE is internet explorer.
     private static String htmlCreator; // =null;
 
@@ -49,61 +51,20 @@ public final class RelFile {
     //files (images, sounds, etc.). Perhaps should be in Kirrkirr?
     public static String dictionaryDir;
 
+
     private RelFile() {} // static class
 
-    /** Init is used to initialize where the codebase is and whether
-     * one has an applet.  It should be called before using other things.
-     * This version called from the applet with the codebase URL.
-     * Also sets up line separator, file separator, the temporary/writeable
-     * directory and whether the system can play audio. For macintoshes,
-     * sets the application used for opening html files (if it can
-     * be found).
-     * @param codeBase the URL representing the codebase/Kirrkirr home.
-     */
-    public static void Init(URL codeBase) {
-        isApplet = true;
-        fileSeparator = "/";
-        lineSeparator = System.getProperty("line.separator");
-        RelFile.codeBase = codeBase;
-        if (Dbg.FILE) {
-            Dbg.print("RelFile.Init: running as applet");
-	    dumpSystemInfo();
-        }
-
-        // --- Java 1.2 only
-        //try {
-        //    File tmpFile = File.createTempFile("kirrkirr","tmp");
-        //    Dbg.print("tmp:" + tmpFile.getAbsolutePath());
-        //} catch (Exception e) {
-        //    Dbg.print(e);
-        //}
-        //WRITE_DIRECTORY = getPath(tmpFile);
-        // ---
-        WRITE_DIRECTORY = codeBase.getFile(); // was "TEMP";
-
-        if (WRITE_DIRECTORY.charAt(WRITE_DIRECTORY.length()-1)=='/'){
-            WRITE_DIRECTORY=WRITE_DIRECTORY.substring(0,WRITE_DIRECTORY.length()-1);
-        }
-
-        /*if (RelFile.codeBase.charAt(RelFile.codeBase.length()-1)=='/'){
-            RelFile.codeBase=RelFile.codeBase.substring(0,RelFile.codeBase.length()-1);
-            }*/
-        String javaVersion = System.getProperty("java.version");
-        applAudio = (javaVersion.compareTo("1.2") >= 0);
-        setHtmlCreator();
-    }
-
-
-    /** Init is used to initialize where the codebase is and whether
+    /** init is used to initialize where the codebase is and whether
      * one has an applet.  It should be called before using other things.
      * This version is called when it is not an applet.
      * Also sets up line separator, file separator, the temporary/writeable
      * directory and whether the system can play audio. For macintoshes,
      * sets the application used for opening html files (if it can
      * be found).
+     *
      * @param directory the string of the user's codebase/Kirrkirr directory.
      */
-    public static void Init(String directory) {
+    public static void init(String directory) {
         isApplet = false;
         fileSeparator = System.getProperty("file.separator");
         lineSeparator = System.getProperty("line.separator");
@@ -118,10 +79,6 @@ public final class RelFile {
 	    dumpSystemInfo();
         }
 
-        // Only a Java VM 1.2 or higher is capable of playing audio clips
-        // (can't convert 1.1.8 to decimal, so string comparison is used
-        String javaVersion = System.getProperty("java.version");
-        applAudio = (javaVersion.compareTo("1.2") >= 0);
         setHtmlCreator();
     }
 
@@ -213,6 +170,7 @@ public final class RelFile {
 
     /** Returns the path without the file from the fully qualified
      *  pathname or URL passed in.
+     *
      *  @param u A complete file path
      *  @return the path (without the last filename)
      *    from the fully qualified pathname or URL passed in
@@ -229,23 +187,25 @@ public final class RelFile {
     }
 
     /** Creates a string representing the path to the file, and puts the
-     *  string in the StringBuffer passed in. The order is the order
+     *  string in the StringBuilder passed in. The order is the order
      *  passed in, ie:
      *  base+fileseparator+folder+fileseparator+subfolder+fileseparator+file
      *  If any of the arguments are null, it skips adding them and the next
      *  fileseparator.
      */
-    private static void FillStringBuffer(StringBuffer sb, String base,
-                                  String folder, String subfolder, String file) {
-        if (base != null && ! base.equals("")) {
+    // todo [FILE_REDO]: Change in 2020: Just ignore the base, since now the folder is assumed to be a complete path.
+    private static void fillStringBuilder(StringBuilder sb, String base,
+                                          String folder, String subfolder, String file) {
+        // todo [FILE_REDO]: Comment out this first if or else make it update path relative to base using File API
+        if (base != null && ! base.isEmpty()) {
             sb.append(base);
             sb.append(fileSeparator);
         }
-        if (folder != null && ! folder.equals("")) {
+        if (folder != null && ! folder.isEmpty()) {
             sb.append(folder);
             sb.append(fileSeparator);
         }
-        if (subfolder != null && ! subfolder.equals("")) {
+        if (subfolder != null && ! subfolder.isEmpty()) {
             sb.append(subfolder);
             sb.append(fileSeparator);
         }
@@ -266,21 +226,22 @@ public final class RelFile {
      *  and subfolder) specified relative to the code base, or the null if
      *  the file URL can't be formed (if applet)
      */
-    public static String MakeFileName(String folder, String subfolder,
+    public static String makeFileName(String folder, String subfolder,
                                       String file) {
-        StringBuffer sb = new StringBuffer(80);
+        StringBuilder sb = new StringBuilder(80);
 
-        FillStringBuffer(sb, codeBaseStr, folder, subfolder, file);
+        fillStringBuilder(sb, codeBaseStr, folder, subfolder, file);
         String str = sb.toString();
         if (isApplet) {
-            URL url;
-            try {
-                url = new URL(codeBase, str);
-            } catch (MalformedURLException e) {
-                if (Dbg.ERROR) Dbg.print("Couldn't create " + str + ": badly specified URL");
-                return null;
-            }
-            return url.getFile();
+//            URL url;
+//            try {
+//                url = new URL(codeBase, str);
+//            } catch (MalformedURLException e) {
+//                if (Dbg.ERROR) Dbg.print("Couldn't create " + str + ": badly specified URL");
+//                return null;
+//            }
+//            return url.getFile();
+            return null;
         } else {
             return str;
         }
@@ -294,9 +255,8 @@ public final class RelFile {
      * specified relative to the code base, or the null if the file URL
      * can't be formed (if applet)
      */
-    public static String MakeFileName(String subfolder, String file)
-    {
-        return MakeFileName(null, subfolder, file);
+    public static String makeFileName(String subfolder, String file) {
+        return makeFileName(null, subfolder, file);
     }
 
     /** Get a string representation of a filename specified in the subfolder
@@ -306,9 +266,9 @@ public final class RelFile {
      *          specified relative to the temporary (writeable) directory
      */
     public static String MakeWriteFileName(String subfolder, String file) {
-        StringBuffer sb = new StringBuffer(80);  // initial size; starts empty
+        StringBuilder sb = new StringBuilder(80);  // initial size; starts empty
 
-        FillStringBuffer(sb, WRITE_DIRECTORY, null, subfolder, file);
+        fillStringBuilder(sb, WRITE_DIRECTORY, null, subfolder, file);
         if (Dbg.FILE) {
             Dbg.print("Made write file is |" + sb.toString() + '|');
             Dbg.print("fileSeparator is " + fileSeparator +
@@ -325,24 +285,24 @@ public final class RelFile {
      *      the file URL can't be formed
      */
     public static URL makeURL(String folder, String subfolder, String file) {
-        StringBuffer sb = new StringBuffer(80);  // initial size; starts empty
+        // Dbg.print("makeURL called with |" + folder + "| |" + subfolder + "| |" + file + '|');
+        StringBuilder sb = new StringBuilder(80);  // initial size; starts empty
         URL url;
 
-        FillStringBuffer(sb, codeBaseStr, folder, subfolder, file);
+        fillStringBuilder(sb, codeBaseStr, folder, subfolder, file);
+        // Dbg.print("fillStringBuilder returned |" + sb.toString() + '|');
         try {
-            if (isApplet)
-                {
-                    url = new URL(codeBase, sb.toString());
-                }
-            else
-                {
-                    url = new URL("file", "", sb.toString());
-                    // cdm: if 2nd argument was null in URL constructor,
-                    // under Unix run as an application, one got
-                    // NullPointerExceptions elsewhere in the program when
-                    // url was used.  Making it empty string seems to
-                    // fix things!  (Using null worked fine on Windows....)
-                }
+            if (isApplet) {
+                // url = new URL(codeBase, sb.toString());
+                url = null;
+            } else {
+                url = new URL("file", "", sb.toString());
+                // cdm: if 2nd argument was null in URL constructor,
+                // under Unix run as an application, one got
+                // NullPointerExceptions elsewhere in the program when
+                // url was used.  Making it empty string seems to
+                // fix things!  (Using null worked fine on Windows....)
+            }
         } catch (MalformedURLException e) {
             if (Dbg.ERROR) Dbg.print("Couldn't create " +
                                     sb.toString() + ": badly specified URL");
@@ -381,10 +341,10 @@ public final class RelFile {
      * if the file URL can't be formed
      */
     public static URL MakeWriteURL(String subfolder, String file) {
-        StringBuffer sb = new StringBuffer(80);  // inital size only; starts empty
+        StringBuilder sb = new StringBuilder(80);  // inital size only; starts empty
         URL url;
 
-        FillStringBuffer(sb, WRITE_DIRECTORY, null, subfolder, file);
+        fillStringBuilder(sb, WRITE_DIRECTORY, null, subfolder, file);
         try {
             url = new URL("file", "", sb.toString());
             // cdm: if 2nd argument was null in URL constructor, under Unix run
@@ -503,63 +463,54 @@ public final class RelFile {
      * or null if the current system can't play audio, or null if the URL couldn't
      * be formed
      */
-    public static AudioClip MakeAudioClip(String folder, String subfolder,
-                                          String filename) {
-        AudioClip clip = null;
-        if (applAudio) {
-            // in Java 2 both applications and Applets can make audio clips (in any format) from this static method
-            URL url= makeURL(folder, subfolder, filename);
-            if (url==null) {
-                if (Dbg.ERROR) Dbg.print("RelFile:MakeAudioClip(folder,subfolder,file): null url"+folder+ ' ' +subfolder+ ' ' +filename);
-                return null;
+    public static Clip makeAudioClip(String folder, String subfolder,
+                                     String filename) {
+        Clip clip = null;
+        URL url = makeURL(folder, subfolder, filename);
+        try {
+            clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(url));
+        } catch (LineUnavailableException lue) {
+            if (Dbg.ERROR) {
+                Dbg.print("RelFile:makeAudioClip(folder,subfolder,file): audio system unavailable");
             }
-            //this won't compile under jdk1.1 - that's okay
-            //must leave in for sound on jdk>1.1
-            clip = Applet.newAudioClip(url);
-        } else if(isApplet) {
-            URL url= makeURL(folder, subfolder, filename);
-            if (url==null) {
-                if (Dbg.ERROR) Dbg.print("RelFile:MakeAudioClip(folder,subfolder,file): null url"+folder+ ' ' +subfolder+ ' ' +filename);
-                return null;
+        } catch (UnsupportedAudioFileException uafe) {
+            if (Dbg.ERROR) {
+                Dbg.print("RelFile:makeAudioClip(folder,subfolder,file): not valid audio file " + folder + ' ' + subfolder + ' ' + filename);
             }
-            // Less than Java 2, use the applet (if it exists)
-            clip = Kirrkirr.demo.getAudioClip(url);
+        } catch (IOException ioe) {
+            if (Dbg.ERROR) {
+                Dbg.print("RelFile:makeAudioClip(folder,subfolder,file): IO error " + folder + ' ' + subfolder + ' ' + filename);
+            }
         }
         return(clip);
     }
 
     /**
-     * If the system can play audio, make an AudioClip from the
+     * If the system can play audio, make a Clip from the
      * file and subfolder specified, relative to the codebase.
-     * The system can play audio if the jdk is 1.2 or higher,
-     * or if it's an applet.
-     * @return the AudioClip representing the audio file at the
+     * Now upgraded to use modern Java Sound not the old
+     * historical mechanisms. Before, the system can play audio
+     * if the jdk is 1.2 or higher or if it's an applet using Applet APIs.
+     *
+     * @return the Clip representing the audio file at the
      * filename (including the subfolder) specified, relative to the code base,
      * or the null if the current system can't play audio.
      */
-    public static AudioClip makeAudioClip(String subfolder, String filename) {
-        return MakeAudioClip(null, subfolder, filename);
+    public static Clip makeAudioClip(String subfolder, String filename) {
+        return makeAudioClip(null, subfolder, filename);
     }
 
-    public static AudioClip makeAudioClip(String filename, boolean dictSpecific) {
-        if (dictSpecific){
-            if (dictionaryDir==null)
+    public static Clip makeAudioClip(String filename, boolean dictSpecific) {
+        if (dictSpecific) {
+            if (dictionaryDir == null) {
                 return null;
-            return MakeAudioClip(dictionaryDir,Kirrkirr.soundFolder,filename);
-        }else{
+            }
+            return makeAudioClip(dictionaryDir,Kirrkirr.soundFolder,filename);
+        } else {
             return makeAudioClip(Kirrkirr.soundFolder, filename);
         }
     }
-
-    /**
-     * Whether or not the system can play audio. The system can play audio
-     * if the jdk is 1.2 or higher, or if it's an applet.
-     */
-    public static boolean canMakeAudioClip()
-    {
-        return (applAudio || isApplet);
-    }
-
 
     /**
      * Make an ImageIcon from the file, folder and subfolder specified,
@@ -582,7 +533,7 @@ public final class RelFile {
             }
             return new ImageIcon(url);
         } else {
-            String fullname = MakeFileName(folder,subfolder,filename);
+            String fullname = makeFileName(folder,subfolder,filename);
             if (Dbg.FILE) {
               File test = new File(fullname);
               if (! test.isFile()) {
@@ -605,9 +556,10 @@ public final class RelFile {
     }
 
     /** Make an ImageIcon from the file specified.  It will be looked for in
-     *  the <code>Kirrkirr.iconsFolder</code> if it isn't <code>dictSpec</code>,
-     *  and in the <code>Kirrkirr.imagesFolder</code> subfolder of the current
-     *  dictionary if it is
+     *  the {@code Kirrkirr.iconsFolder} if it isn't {@code dictSpec},
+     *  and in the {@code Kirrkirr.imagesFolder} subfolder of the current
+     *  dictionary if it is.
+     *
      *  @param filename The name of the image file
      *  @param dictSpecific Whether it's a dictionary (language) specific image,
      *     or a general Kirrkirr icon
@@ -689,11 +641,11 @@ public final class RelFile {
         String[] files = sub.list(filter);
         if (files != null) {
             File target;
-            for (int i=0 ; i < files.length ; i++) {
-                target = new File(sub, files[i]);
+            for (String file : files) {
+                target = new File(sub, file);
                 // Dbg.print("deleting: "+ target.toString());
 
-                if(target.canWrite() && target.isFile()) {
+                if (target.canWrite() && target.isFile()) {
                     target.delete();
                 }
             }
@@ -761,12 +713,12 @@ public final class RelFile {
 
         String[] files = sourceFolder.list(filter);
 
-        for (int i=0 ; i < files.length ; i++) {
-            File source = new File(sourceFolder, files[i]);
-            File target = new File(targetFolder, files[i]);
+        for (String file : files) {
+            File source = new File(sourceFolder, file);
+            File target = new File(targetFolder, file);
             // Dbg.print("moving from: "+ source.toString()+" to: "+ target.toString());
 
-            if(source.canWrite() && source.isFile()) {
+            if (source.canWrite() && source.isFile()) {
                 source.renameTo(target);
             }
         }
@@ -879,7 +831,7 @@ public final class RelFile {
                 System.getProperty("os.arch") + ", version: " +
                 System.getProperty("os.version"));
 	Dbg.print("  fileSeparator is " + fileSeparator);
-	Dbg.print("  codeBase is " + codeBase);
+	// Dbg.print("  codeBase is " + codeBase);
         Dbg.print("  Helper.onClassicMac() " + Helper.onClassicMac() +
 		  "; Helper.onMacOSX() " + Helper.onMacOSX());
     }

@@ -39,7 +39,7 @@ public class HtmlDialog extends JFrame
     public static final int NOTES = 2;
 
     private final HtmlPanel    htmlGloss; // = null;
-    private NotesPanel   textNotes;
+    private NotesPanel textNotes;
     private final String current;
     private final boolean notes;
     private static Kirrkirr parent;
@@ -215,7 +215,7 @@ public class HtmlDialog extends JFrame
 
 	    if ((currentPlace+1) < history.size()){
                 currentPlace++;
-                setCurrentWord((String)history.elementAt(currentPlace));
+                setCurrentWord(history.elementAt(currentPlace));
 	    }
             b_forward.setEnabled((currentPlace + 1) < history.size());
 
@@ -223,7 +223,7 @@ public class HtmlDialog extends JFrame
 
             if (currentPlace > 0){
                 currentPlace--;
-                setCurrentWord((String)history.elementAt(currentPlace));
+                setCurrentWord(history.elementAt(currentPlace));
 	    }
             b_back.setEnabled(currentPlace > 0);
 
@@ -266,16 +266,8 @@ public class HtmlDialog extends JFrame
             history.addElement(word);
             currentPlace++;
 	}
-        if (!((currentPlace+1) < history.size())) {
-            b_forward.setEnabled(false);
-        } else {
-            b_forward.setEnabled(true);
-        }
-        if (currentPlace > 0) {
-            b_back.setEnabled(true);
-        } else {
-            b_back.setEnabled(false);
-        }
+        b_forward.setEnabled((currentPlace + 1) < history.size());
+        b_back.setEnabled(currentPlace > 0);
    }
 
 
@@ -323,6 +315,10 @@ public class HtmlDialog extends JFrame
     @Override
     public void hyperlinkUpdate(HyperlinkEvent event) {
         HyperlinkEvent.EventType eventType = event.getEventType();
+        /*
+        // TODO: Remember what I was doing here and finish it!
+        // I think maybe the idea was putting HTML and Notes in one panel
+        // Or was it having HtmlDialog also work for the Help system?!?
         if (eventType == HyperlinkEvent.EventType.ACTIVATED) {
             if (event instanceof HTMLFrameHyperlinkEvent) {
                 HTMLFrameHyperlinkEvent linkEvent =
@@ -334,6 +330,7 @@ public class HtmlDialog extends JFrame
                 showPage(event.getURL(), true);
             }
         }
+        */
     }
 
 }

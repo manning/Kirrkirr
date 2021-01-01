@@ -288,6 +288,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
 
 
     //necessary for filling in KirrkirrPanel interface methods
+    @Override
     public boolean isResizable() {
         return true;
     }
@@ -305,6 +306,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
      *  do nothing if it was themselves that changed the word (tested by
      *  checking the signaller)
      */
+    @Override
     public void setCurrentWord(String uniqueKey,
                                boolean gloss,
                                final JComponent signaller, final int signallerType,
@@ -349,6 +351,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
      *
      *  @param toGloss true when the scroll list was switched to gloss
      */
+    @Override
     public void scrollPanelChanged(boolean toGloss) {
         glossMode = toGloss;
     }
@@ -361,6 +364,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
      *
      *  @return The string to be used as rollover text
      */
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_DESC);
     }
@@ -369,6 +373,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
     /** When we are selected, we should start up the appropriate
      *  background threads (painter and animation).
      */
+    @Override
     public void tabSelected() {
         dt.start();
     }
@@ -377,6 +382,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
     /** When the domain panel is deselected in the tabbed view, we should
      *  kill off any background threads that are still running.
      */
+    @Override
     public void tabDeselected() {
         dt.halt();
     }
@@ -385,11 +391,13 @@ public class NewSemanticPanel extends KirrkirrPanel implements
     /** When Kirrkirr is activated/deactivated (due to window
      * restoration/minimization), we start/stop our threads, respectively.
      */
+    @Override
     public void start() {
         dt.start();
     }
 
 
+    @Override
     public void stop() {
         dt.halt();
     }
@@ -415,6 +423,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
     }
 
 
+    @Override
     public KirrkirrOptionPanel getOptionPanel() {
         return new DomainsOptionPanel(this);
     }
@@ -442,6 +451,7 @@ public class NewSemanticPanel extends KirrkirrPanel implements
 
     static class SenseRenderer extends DefaultListCellRenderer {
 
+        @Override
         public Component getListCellRendererComponent(JList list,
                                                       Object value,
                                                       int index,

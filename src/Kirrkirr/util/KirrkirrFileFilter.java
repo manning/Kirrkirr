@@ -3,7 +3,7 @@ package Kirrkirr.util;
 import java.io.*;
 import javax.swing.filechooser.FileFilter;
 
-/** The <code>KirrkirrFileFilter</code> object
+/** The {@code KirrkirrFileFilter} object
  *  is a convenient place to put file filter objects.
  *  Currently, can check for xml, temporary html,
  *  or user profile (plain, dat, xml, or csh) files.
@@ -47,7 +47,7 @@ public class KirrkirrFileFilter extends FileFilter implements FilenameFilter {
     private static final String AU_EXT = "au";
     private static final String WAV_EXT = "wav";
 
-    private short filter_type;
+    private final short filter_type;
 
     public String toString() {
         return "KirrkirrFileFilter on " + getDescription() +
@@ -88,7 +88,7 @@ public class KirrkirrFileFilter extends FileFilter implements FilenameFilter {
             }
             return false;
 	}
-	return accept(new File(parent),file.getName());
+	return accept(new File(parent), file.getName());
     }
 
     /** Returns whether the file in the directory
@@ -140,12 +140,7 @@ public class KirrkirrFileFilter extends FileFilter implements FilenameFilter {
      */
     private static boolean isXmlEntry(String name) {
 	String extension = getExtension(name);
-	if (extension != null) {
-            if (extension.equals(XML_EXT)) {
-		return(true);
-	    }
-	}
-        return false;
+        return extension != null && extension.equals(XML_EXT);
     }
 
 
@@ -153,32 +148,17 @@ public class KirrkirrFileFilter extends FileFilter implements FilenameFilter {
      */
     private static boolean isXslEntry(String name) {
 	String extension = getExtension(name);
-	if (extension != null) {
-            if (extension.equals(XSL_EXT)) {
-		return(true);
-	    }
-	}
-        return false;
+        return extension != null && extension.equals(XSL_EXT);
     }
 
     private static boolean isClkEntry(String name) {
 	String extension = getExtension(name);
-	if (extension != null) {
-            if (extension.equals(CLK_EXT)) {
-		return(true);
-	    }
-	}
-        return(false);
+        return extension != null && extension.equals(CLK_EXT);
     }
 
     private static boolean isPropEntry(String name) {
     	String extension = getExtension(name);
-    	if (extension != null) {
-    		if (extension.equals(PROP_EXT)) {
-    			return true;
-    		}
-    	}
-    	return false;
+        return extension != null && extension.equals(PROP_EXT);
     }
 
 

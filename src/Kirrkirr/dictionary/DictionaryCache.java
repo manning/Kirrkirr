@@ -178,12 +178,12 @@ public final class DictionaryCache implements Serializable {
             if (Dbg.TIMING) time = System.currentTimeMillis();
             InputStream is;
             if (parent.APPLET) {
-                URL index_url = RelFile.makeURL(RelFile.dictionaryDir,clkFile);//new URL(clkFile);
+                URL index_url = RelFile.makeURL(RelFile.dictionaryDir, clkFile); //new URL(clkFile);
                 URLConnection yc = index_url.openConnection();
                 is = yc.getInputStream();
             } else {
                 // try {
-                    is = new FileInputStream(RelFile.MakeFileName(RelFile.dictionaryDir,clkFile));
+                    is = new FileInputStream(RelFile.makeFileName(RelFile.dictionaryDir, clkFile));
                 //} catch (FileNotFoundException fnfe) {
                 //    JOptionPane.showMessageDialog(null,
                 //        Helper.getTranslation(SC_NEED_INDEX),
@@ -209,7 +209,7 @@ public final class DictionaryCache implements Serializable {
             EIndexLoader loader = new EIndexLoader();
             glossLoader = new Thread(loader);
             glossLoader.setPriority(Thread.MIN_PRIORITY);
-        } catch(Exception e) {
+        } catch (Exception e) {
             if (index == null) {
                 throw e;
             }
@@ -224,7 +224,7 @@ public final class DictionaryCache implements Serializable {
             xmlFilename = RelFile.MakeURLString(RelFile.dictionaryDir,
                                                 Kirrkirr.xmlFile);
         } else {
-            xmlFilename = RelFile.MakeFileName(RelFile.dictionaryDir,
+            xmlFilename = RelFile.makeFileName(RelFile.dictionaryDir,
                                                Kirrkirr.xmlFile);
         }
     }
@@ -479,13 +479,13 @@ public final class DictionaryCache implements Serializable {
         String userDir = fileChooser.getSelectedFile().getParent();
 
         //make sure user's file ends in .htm or .html
-        if(userHtmlFile.indexOf(".htm")==-1)
-            userHtmlFile=userHtmlFile.concat(".html");
-        int filenameIndex=userHtmlFile.indexOf(".htm");
+        if ( ! userHtmlFile.contains(".htm"))
+            userHtmlFile = userHtmlFile.concat(".html");
+        int filenameIndex = userHtmlFile.indexOf(".htm");
         String tempXmlFile = RelFile.MakeWriteFileName(xmlFolder,
-                                                       Helper.wordToXmlFilename(userHtmlFile.substring(0,filenameIndex)));
+                Helper.wordToXmlFilename(userHtmlFile.substring(0,filenameIndex)));
 
-        try{
+        try {
             //create and write merged xml file
             generateDocument(list, tempXmlFile);
             //use temp xml file to make html file in user's directory, and
@@ -569,6 +569,7 @@ public final class DictionaryCache implements Serializable {
      *  and return it.
      *  If they don't choose one, or there are problems opening
      *  or reading it, return null.
+     *
      *  @return the Vector of headwords, or null if they don't choose
      *          a file or if there was a problem opening/reading the file.
      */
@@ -809,11 +810,9 @@ public final class DictionaryCache implements Serializable {
                     String imageDir=RelFile.MakeURLString(RelFile.dictionaryDir,Kirrkirr.imagesFolder,"");
                     String soundDir=RelFile.MakeURLString(RelFile.dictionaryDir,Kirrkirr.soundFolder,"");
                     cachedHeaderDirectoryInfo = /* XML_HEADER + */
-                        RelFile.lineSeparator() + "<DIR><IDIR>" + imageDir + "</IDIR>";
-                    if (RelFile.canMakeAudioClip()) {
-                        cachedHeaderDirectoryInfo = cachedHeaderDirectoryInfo +
+                            RelFile.lineSeparator() + "<DIR><IDIR>" + imageDir + "</IDIR>";
+                    cachedHeaderDirectoryInfo = cachedHeaderDirectoryInfo +
                             "<SDIR>" + soundDir + "</SDIR>";
-                    }
                     cachedCalledBefore = true;
                 }
                 // make a temporary "@dir@.xml" file with the directory info
@@ -1843,13 +1842,14 @@ public final class DictionaryCache implements Serializable {
         return dE.freq;
     }
 
-    public Vector getHeadwords(GlossDictEntry ede){
+    public static Vector<String> getHeadwords(GlossDictEntry ede){
         if (ede==null || ede.headwords ==null) return null;
-        Vector v=new Vector();
-        for (int i=0;i<ede.headwords.length;i++){
+        Vector<String> v = new Vector<>();
+        for (int i = 0; i < ede.headwords.length; i++) {
             //String cur=getHeadword(ede.fpos[i]);
-            if (ede.headwords[i]!=null)
+            if (ede.headwords[i] != null) {
                 v.addElement(ede.headwords[i]);
+            }
         }
         return v;
     }
@@ -2039,7 +2039,7 @@ public final class DictionaryCache implements Serializable {
 
     /** Returns the headword in the xml document.
      *  @param doc the XmlDocument with the XmlEntry
-     *  @return String of the headword, or <code>null</code> if one
+     *  @return String of the headword, or {@code null} if one
      *          can't be found.
      */
     private String getHeadWordFromDoc(Document doc) {
@@ -2361,13 +2361,12 @@ public final class DictionaryCache implements Serializable {
      */
     class EIndexLoader implements Runnable {
 
-        public void run()
-        {
+        @Override
+        public void run() {
             if (Dbg.CACHE) {
                 Dbg.print("engIndexFile is |" + Kirrkirr.engIndexFile + '|');
             }
-            if (Kirrkirr.engIndexFile == null ||
-                     "".equals(Kirrkirr.engIndexFile)) {
+            if (Kirrkirr.engIndexFile == null || Kirrkirr.engIndexFile.isEmpty()) {
                 parent.disableGlossList();
                 glossLoader=null;
                 return;
@@ -2379,11 +2378,11 @@ public final class DictionaryCache implements Serializable {
                 if (Dbg.TIMING) time=System.currentTimeMillis();
                 InputStream is;
                 if (parent.APPLET) {
-                    URL index_url = RelFile.makeURL(RelFile.dictionaryDir,Kirrkirr.engIndexFile);//new URL(Kirrkirr.engIndexFile);
+                    URL index_url = RelFile.makeURL(RelFile.dictionaryDir, Kirrkirr.engIndexFile); //new URL(Kirrkirr.engIndexFile);
                     URLConnection yc = index_url.openConnection();
                     is = yc.getInputStream();
                 } else {
-                    is = new FileInputStream(RelFile.MakeFileName(RelFile.dictionaryDir,Kirrkirr.engIndexFile));
+                    is = new FileInputStream(RelFile.makeFileName(RelFile.dictionaryDir,Kirrkirr.engIndexFile));
                 }
                 ObjectInputStream ois =
                     new ObjectInputStream(new BufferedInputStream(is));
@@ -2398,8 +2397,8 @@ public final class DictionaryCache implements Serializable {
                 // now not used; we build it dynamically.
                 // glossList = (Vector) glossIndex.remove(DictField.H_WORDS);
                 parent.scrollPanel.mainwords=(Vector)glossIndex.remove(DictField.MAINWORDS);
-                glossCache=new Hashtable();
-                glossHitList=new Vector();
+                glossCache = new Hashtable();
+                glossHitList = new Vector();
                 if (Dbg.TIMING) {
                     time=System.currentTimeMillis();
                 }
@@ -2423,10 +2422,10 @@ public final class DictionaryCache implements Serializable {
 
 
 
-        private Vector createGlossList(Vector items) {
+        private Vector<String> createGlossList(Vector items) {
             // Collections.sort(items, new KAlphaComparator());
             int itemsSize = items.size();
-            Vector v = new Vector(itemsSize);
+            Vector<String> v = new Vector<String>(itemsSize);
             for (int i = 0; i < itemsSize; i++) {
                 String cur = (String) items.elementAt(i);
                 GlossDictEntry ede = getGlossIndexEntry(cur);
@@ -2480,7 +2479,7 @@ class CacheEntry implements Externalizable {
     public CacheEntry() {
     }
 
-    public CacheEntry(DictEntry entry, DictFields links, Vector gloss,
+    public CacheEntry(DictEntry entry, DictFields links, Vector<DictField> gloss,
                 Vector domains, DictFields sounds, DictFields pictures,
                 String xmlFile, String htmlFile) {
         this.entry = entry;
@@ -2516,6 +2515,7 @@ class CacheEntry implements Externalizable {
                 ']' + RelFile.lineSeparator();
     }
 
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(entry);
         out.writeObject(links);
@@ -2527,6 +2527,7 @@ class CacheEntry implements Externalizable {
         out.writeObject(htmlFile);
     }
 
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         entry = (DictEntry) in.readObject();
         links = (DictFields) in.readObject();

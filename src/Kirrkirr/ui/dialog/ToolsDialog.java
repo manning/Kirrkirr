@@ -67,13 +67,13 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
     private String forwardIndex, reverseIndex, domFile, dictFile, specFile, domConvFile;
 
     //sizing info
-    private static final Dimension minimumSize = new Dimension(500, 500);
+    private static final Dimension minimumSize = new Dimension(500, 550);
 
 
     /** Create a new ToolsDialog window.
      *
      *  @param modal Here, false means non-modal. I.e., other windows can be
-     *     active, and true means that this is a requestor that must be dealt
+     *     active, and true means that this is a requester that must be dealt
      *     with.
      */
     public ToolsDialog(Kirrkirr parent, boolean modal) {
@@ -97,6 +97,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         setupButtonPanel();
 
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e){
                 dispose();
             }
@@ -279,6 +280,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
      * input was valid and tests started, close on completion.
      * If cancel is clicked, just close.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == run) {
@@ -299,7 +301,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
     @Override
     public boolean accept(File file) {
         propFile = file.getName();
-        if (propFile != null && ! propFile.equalsIgnoreCase("")) {
+        if (propFile != null && ! propFile.isEmpty()) {
             File parent = file.getParentFile();
             if (parent != null) {
                 fillInFields(parent.getName());
@@ -336,14 +338,14 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
 
             dictFile = selectedProps.getProperty("dictionary.dictionary");
             if (dictFile != null) {
-            	dictFile = RelFile.MakeFileName(parent, dictFile);
+            	dictFile = RelFile.makeFileName(parent, dictFile);
             	dictFilePanel.setText(dictFile);
             } else {
             	dictFilePanel.setText("");
             }
             specFile = selectedProps.getProperty("dictionary.dictSpecFile");
             if (specFile != null) {
-            	specFile = RelFile.MakeFileName(parent, specFile);
+            	specFile = RelFile.makeFileName(parent, specFile);
             	specFilePanel.setText(specFile);
             } else {
             	specFilePanel.setText("");
@@ -351,7 +353,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
             forwardIndex = selectedProps.getProperty("dictionary.index");
             if (forwardIndex != null) {
             	makeForwardIndex.setSelected(true);
-            	forwardIndex = RelFile.MakeFileName(parent, forwardIndex);
+            	forwardIndex = RelFile.makeFileName(parent, forwardIndex);
             	forwardIndexPanel.setText(forwardIndex);
             } else {
             	makeForwardIndex.setSelected(false);
@@ -360,7 +362,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
             reverseIndex = selectedProps.getProperty("dictionary.reverseIndex");
             if (reverseIndex != null) {
             	makeReverseIndex.setSelected(true);
-            	reverseIndex = RelFile.MakeFileName(parent, reverseIndex);
+            	reverseIndex = RelFile.makeFileName(parent, reverseIndex);
             	reverseIndexPanel.setText(reverseIndex);
             } else {
             	makeReverseIndex.setSelected(false);
@@ -369,7 +371,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
             domFile = selectedProps.getProperty("dictionary.domainFile");
             if (domFile != null) {
             	makeDomainFile.setSelected(true);
-            	domFile = RelFile.MakeFileName(parent, domFile);
+            	domFile = RelFile.makeFileName(parent, domFile);
             	domainFilePanel.setText(domFile);
             } else {
             	makeDomainFile.setSelected(false);
@@ -378,7 +380,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
             domConvFile = selectedProps.getProperty("dictionary.domainConverter");
             if (domConvFile != null) {
             	useDomainConvFile.setSelected(true);
-            	domConvFile = RelFile.MakeFileName(parent, domConvFile);
+            	domConvFile = RelFile.makeFileName(parent, domConvFile);
             	domainConvFilePanel.setText(domConvFile);
             } else {
             	useDomainConvFile.setSelected(false);
@@ -414,6 +416,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
     /** Actually make auxiliary files based on user's requests.
      *  Note that this is done on a background thread.
      */
+    @Override
     public void run() {
         IndexProgressDialog tracker = new IndexProgressDialog(Kirrkirr.window,
                 forwardIndex != null, reverseIndex != null, domFile != null);
@@ -449,7 +452,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
 
         //check dictionary file
         dictFile = dictFilePanel.getText();
-        if (dictFile == null || dictFile.length() == 0) {
+        if (dictFile == null || dictFile.isEmpty()) {
             //error - no dictionary file specified - pop up dialog saying
             //so
             popupNeedInputDialog(SC_DICT_FILE);
@@ -458,7 +461,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
 
         //check specification file
         specFile = specFilePanel.getText();
-        if (specFile == null || specFile.length() == 0) {
+        if (specFile == null || specFile.isEmpty()) {
             //error - no spec file specified - pop up dialog saying so
             popupNeedInputDialog(SC_SPEC_FILE);
             return false;
@@ -467,7 +470,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         //check forward index
         if (makeForwardIndex.isSelected()) {
             forwardIndex = forwardIndexPanel.getText();
-            if(forwardIndex == null ||forwardIndex.length() == 0) {
+            if (forwardIndex == null || forwardIndex.isEmpty()) {
                 //error - no fwd index file specified = pop up dialog
                 popupNeedInputDialog(SC_FWD_FILE);
                 return false;
@@ -477,7 +480,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         //check reverse index
         if (makeReverseIndex.isSelected()) {
             reverseIndex = reverseIndexPanel.getText();
-            if(reverseIndex == null || reverseIndex.length() == 0) {
+            if (reverseIndex == null || reverseIndex.isEmpty()) {
                 //error - no forward index filename specified - pop up
                 //dialog saying so
                 popupNeedInputDialog(SC_REV_FILE);
@@ -488,7 +491,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         //domain file
         if (makeDomainFile.isSelected()) {
             domFile = domainFilePanel.getText();
-            if(domFile == null || domFile.length() == 0) {
+            if (domFile == null || domFile.isEmpty()) {
                 //error - no domain file specified - pop up dialog saying so
                 popupNeedInputDialog(SC_DOM_FILE);
                 return false;
@@ -498,7 +501,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         //domain conversion file
         if (useDomainConvFile.isSelected()) {
         	domConvFile = domainConvFilePanel.getText();
-        	if (domConvFile == null || domConvFile.length() == 0) {
+        	if (domConvFile == null || domConvFile.isEmpty()) {
         		popupNeedInputDialog(SC_CONV_FILE);
         		return false;
         	}
@@ -526,9 +529,9 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
 
             //add the error message
             JLabel message = new JLabel(Helper.getTranslation(SC_SPECIFY)
-                                        + " " +
+                                        + ' ' +
                                         Helper.getTranslation(inputName) +
-                                        ".", SwingConstants.CENTER);
+                                        '.', SwingConstants.CENTER);
             getContentPane().add(message, BorderLayout.CENTER);
 
             //add ok button for closing
@@ -551,6 +554,7 @@ public class ToolsDialog extends JDialog implements ActionListener, Runnable, Fi
         }
 
         //when user clicks ok, just close
+        @Override
         public void actionPerformed(ActionEvent e) {
             dispose();
         }

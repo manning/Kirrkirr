@@ -421,10 +421,11 @@ public class Helper {
         out.close();
     }
 
+    // todo [cdm 2020]: Should rather use fileSeparator char?!?
     public static void copyDirectory(File oldDir, String newParent)
     	throws IOException {
     	String oldDirName = oldDir.getName();
-    	String newDirName = newParent + "\\" + oldDirName;
+    	String newDirName = newParent + '\\' + oldDirName;
     	File newDir = new File(newDirName);
     	if (!newDir.exists())
     		newDir.mkdir();

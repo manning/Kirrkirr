@@ -38,7 +38,7 @@ import javax.swing.AbstractListModel;
  * @version 1.26 02/02/00
  * @author Hans Muller
  */
-public class KKListModel<E> extends AbstractListModel {
+public class KKListModel<E> extends AbstractListModel<E> {
 
     private static final long serialVersionUID = -6213104566118351479L;
 
@@ -75,6 +75,7 @@ public class KKListModel<E> extends AbstractListModel {
      * @return  the number of components in this list.
      * @see #size()
      */
+    @Override
     public int getSize() {
         return delegate.size();
     }
@@ -94,6 +95,7 @@ public class KKListModel<E> extends AbstractListModel {
      *             given.
      * @see #get(int)
      */
+    @Override
     public E getElementAt(int index) {
         return delegate.elementAt(index);
     }
@@ -186,7 +188,7 @@ public class KKListModel<E> extends AbstractListModel {
      * @return  an enumeration of the components of this list.
      * @see Vector#elements()
      */
-    public Enumeration elements() {
+    public Enumeration<E> elements() {
         return delegate.elements();
     }
 
@@ -272,7 +274,7 @@ public class KKListModel<E> extends AbstractListModel {
      * @see #get(int)
      * @see Vector#elementAt(int)
      */
-    public Object elementAt(int index) {
+    public E elementAt(int index) {
         return delegate.elementAt(index);
     }
 
@@ -282,7 +284,7 @@ public class KKListModel<E> extends AbstractListModel {
      * @return     the first component of this list
      * @see Vector#firstElement()
      */
-    public Object firstElement() {
+    public E firstElement() {
         return delegate.firstElement();
     }
 
@@ -293,7 +295,7 @@ public class KKListModel<E> extends AbstractListModel {
      * @return  the last component of the list
      * @see Vector#lastElement()
      */
-    public Object lastElement() {
+    public E lastElement() {
         return delegate.lastElement();
     }
 

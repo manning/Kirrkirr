@@ -82,6 +82,7 @@ public class NotesPanel extends KirrkirrPanel implements ActionListener,
     }
 
 
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_NOTES_ROLLOVER);
     }
@@ -139,9 +140,10 @@ public class NotesPanel extends KirrkirrPanel implements ActionListener,
      * Clears the notes for the old word and loads the notes for the
      * new word (if there are any).
      */
+    @Override
     public void setCurrentWord(final String tailWord, boolean gloss,
-                        final JComponent signaller, final int signallerType,
-                        final int arg)
+                               final JComponent signaller, final int signallerType,
+                               final int arg)
     {
         setCurrentWord(tailWord, gloss);
     }
@@ -179,6 +181,7 @@ public class NotesPanel extends KirrkirrPanel implements ActionListener,
      * Returns the color chooser option panel to change the color
      * of the notes. Overrides KirrkirrPanel.
      */
+    @Override
     public KirrkirrOptionPanel getOptionPanel () {
         return(new NotesOptionPanel(this));
     }
@@ -203,6 +206,7 @@ public class NotesPanel extends KirrkirrPanel implements ActionListener,
      *  @param isCut true if this should be a cut operation
      *  @return how many characters were copied (0 if no selection)
      */
+    @Override
     public int copyText(boolean isCut) {
         String selected = textNotes.getSelectedText();
         if (selected != null) {
@@ -237,6 +241,7 @@ public class NotesPanel extends KirrkirrPanel implements ActionListener,
      *  keep on trucking.
      *  @see #saveState
      */
+    @Override
     public void loadState(ObjectInputStream ois) throws IOException,
                                                 ClassNotFoundException {
         notesMade = (Hashtable)ois.readObject();

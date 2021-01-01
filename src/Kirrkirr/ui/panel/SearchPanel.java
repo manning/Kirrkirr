@@ -1006,7 +1006,7 @@ public class SearchPanel extends KirrkirrPanel
             MatchOneHeadword(word, reg, v, null);
         } else {
             GlossDictEntry ede = parent.cache.getGlossIndexEntry(word);
-            Vector vec = parent.cache.getHeadwords(ede);
+            Vector vec = DictionaryCache.getHeadwords(ede);
             if (vec==null) return null;
             for (int i=0, vsize = vec.size(); i < vsize; i++) {
                 MatchOneHeadword((String)vec.elementAt(i), reg, v, word);
@@ -1508,7 +1508,7 @@ public class SearchPanel extends KirrkirrPanel
         if (Dbg.SEARCH) Dbg.print("Using fast search");
         try {
             FileInputStream fis = new
-            FileInputStream(RelFile.MakeFileName(RelFile.dictionaryDir,
+            FileInputStream(RelFile.makeFileName(RelFile.dictionaryDir,
                                                  Kirrkirr.xmlFile));
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, "utf-8"));
             String line;

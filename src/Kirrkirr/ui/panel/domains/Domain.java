@@ -49,7 +49,7 @@ public class Domain {
 
 
     //----------------PRIVATE VARIABLES---------------------//
-    private List<Domain> children;
+    private Vector<Domain> children; // needs to be Vector for multithreading currently
     /** Final target color. */
     protected Color myColor;
     /** Current draw color of node. */
@@ -190,7 +190,7 @@ public class Domain {
         if (haveChildren()) {
             ArrayList<Domain> domains = new ArrayList<Domain>();
             for (Domain child : children) {
-                List grandkids = child.getChildren();
+                List<Domain> grandkids = child.getChildren();
                 if (grandkids != null && !grandkids.isEmpty()) {
                     domains.add(child);
                 }
@@ -483,7 +483,6 @@ public class Domain {
     public void drawText(Graphics g) {}
 
 
-
     /** This is the method that draws Domain objects other than the root node.
      *  It in turn calls drawShape(g) and drawText(g) which are subclassed by
      *  the different classes.
@@ -659,7 +658,7 @@ public class Domain {
         }
 
         int[] descendantArray = new int[nlLeng];
-        children = new ArrayList<Domain>();
+        children = new Vector<>();
         int cSize = 0;  // mirrors the size of children Vector
 
         for (int i = 0; i < nlLeng; i++) {
@@ -689,7 +688,7 @@ public class Domain {
         //number of descendants they contain
         if (children != null) {
             if (Dbg.DOMAINS2) {
-                if (getText().equals("") || getText().equals("spatial")) {
+                if (getText().isEmpty() || getText().equals("spatial")) {
                     Dbg.print("Domain " + ("".equals(getText())? "ROOT": getText()) + " has " + children.size() + " children.");
                 }
             }
@@ -705,7 +704,7 @@ public class Domain {
                 if (Dbg.DOMAINS) {
                   String kidName = child.getText();
                   if (kidName.equals("spatial"))
-                    Dbg.print("Kid " + kidName + " of " + ("".equals(getText())? "ROOT": getText()) + "(" + totalDescendants + " descendants in " + cSize + " children) has " + descendantArray[j] + " descendants and relR " + child.relR);
+                    Dbg.print("Kid " + kidName + " of " + ("".equals(getText())? "ROOT": getText()) + '(' + totalDescendants + " descendants in " + cSize + " children) has " + descendantArray[j] + " descendants and relR " + child.relR);
                 }
 
                 // Use random polar coordinate to distribute children better

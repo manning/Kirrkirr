@@ -135,6 +135,7 @@ public class OldGraphPanel extends KirrkirrPanel implements
     }
 
 
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_GRAPH_ROLLOVER);
     }
@@ -144,6 +145,7 @@ public class OldGraphPanel extends KirrkirrPanel implements
      *  It fills in either the current gloss equivalents or
      *  current words from the history.
      */
+    @Override
     public void tabSelected() {
         // String tailWord = parent.scrollPanel.getSelectedWord();
         // this tailWord could be either Gloss or Headword...
@@ -172,14 +174,17 @@ public class OldGraphPanel extends KirrkirrPanel implements
 
 
     // cdm separate method to start spring alg so can delay
+    @Override
     public void start () {
         funPanel.start();
     }
 
+    @Override
     public void stop () {
         funPanel.stop();
     }
 
+    @Override
     public KirrkirrOptionPanel getOptionPanel() {
         return new FunOptionPanel(funPanel, this);
     }
@@ -190,9 +195,10 @@ public class OldGraphPanel extends KirrkirrPanel implements
      * The internal boolean argument sendLinks indicates whether
      * sprouting should occur (double click or signal from outside)
      */
+    @Override
     public void setCurrentWord(String uniqueKey, boolean gloss,
-                        final JComponent signaller, final int signallerType,
-                        final int arg)
+                               final JComponent signaller, final int signallerType,
+                               final int arg)
     {
         long starttime;
 
@@ -222,7 +228,7 @@ public class OldGraphPanel extends KirrkirrPanel implements
         // tell about update of the Fun panel in status bar
         if (Dbg.TIMING) Dbg.print("XXXX before message format");
         Object[] args = { Helper.getWord(uniqueKey),
-                          new Integer(neighbors) };
+                Integer.valueOf(neighbors)};
         String form;
         if (sendLinks) {
             form = SC_GP1;
@@ -332,6 +338,7 @@ public class OldGraphPanel extends KirrkirrPanel implements
      *   @throws ClassNotFoundException
      *   @throws IOException
      */
+    @Override
     public void loadState(ObjectInputStream ois) throws
                                 IOException, ClassNotFoundException {
         //funPanel.loadState(ois);
@@ -436,7 +443,7 @@ final class FunOptionPanel extends KirrkirrOptionPanel
             // it wasn't working for sliders!
             switch (i) {
                 case K2:
-                    defaultVals[i] = (new Double(funPanel.K2)).intValue();
+                    defaultVals[i] = Double.valueOf(funPanel.K2).intValue();
                     scroll[i] = new JSlider(JSlider.VERTICAL, 3, 500, defaultVals[i]);
                     temp=new JLabel(Helper.getTranslation(SC_STANDARD_REP1));
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -446,7 +453,7 @@ final class FunOptionPanel extends KirrkirrOptionPanel
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
                     break;
                 case K3:
-                    defaultVals[i] = (new Double(funPanel.K3)).intValue();
+                    defaultVals[i] = Double.valueOf(funPanel.K3).intValue();
                     scroll[i] = new JSlider(JSlider.VERTICAL, 6, 400, defaultVals[i]);
                     temp=new JLabel(Helper.getTranslation(SC_EXTRA_REP1));
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -456,7 +463,7 @@ final class FunOptionPanel extends KirrkirrOptionPanel
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
                     break;
                 case Luv:
-                    defaultVals[i] = (new Double(funPanel.Luv)).intValue();
+                    defaultVals[i] = Double.valueOf(funPanel.Luv).intValue();
                     scroll[i] = new JSlider(JSlider.VERTICAL, 40, 200, defaultVals[i]);
                     temp=new JLabel(Helper.getTranslation(SC_RELAXED_SPR1));
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -466,7 +473,7 @@ final class FunOptionPanel extends KirrkirrOptionPanel
                     // temp.setAlignmentX(Component.CENTER_ALIGNMENT);
                     break;
                 case C:
-                    defaultVals[i] = (new Double(300.0 - 1/funPanel.C)).intValue();
+                    defaultVals[i] = Double.valueOf(300.0 - 1/funPanel.C).intValue();
                     //"300 - " so that a big value gives a faster speed
                     scroll[i] = new JSlider(JSlider.VERTICAL, 1, 300, defaultVals[i]);
                     temp=new JLabel(Helper.getTranslation(SC_ANIM_SPEED1));
@@ -571,8 +578,8 @@ final class FunOptionPanel extends KirrkirrOptionPanel
     public void apply() {
         /*        funPanel.K2 = (new Integer(scroll[K2].getValue())).doubleValue();
                   funPanel.K3 = (new Integer(scroll[K3].getValue())).doubleValue();*/
-        funPanel.Luv = (new Integer(scroll[Luv].getValue())).doubleValue();
-        funPanel.C = 1.0/(301.0 - (new Integer(scroll[C].getValue())).doubleValue());
+        funPanel.Luv = Integer.valueOf(scroll[Luv].getValue()).doubleValue();
+        funPanel.C = 1.0/(301.0 - Integer.valueOf(scroll[C].getValue()).doubleValue());
         funPanel.EW = scroll[EW].getValue();
         funPanel.Q_SIZE = scroll[Q_SIZE].getValue();
     }
@@ -593,9 +600,9 @@ public void itemStateChanged(ItemEvent e)
             if (Kirrkirr.profileManager!=null)
                 Kirrkirr.profileManager.setUnsaved();
             if(! links[i].isSelected())
-                funPanel.hideEdge.put(new Short(i), "");
+                funPanel.hideEdge.put(Short.valueOf(i), "");
             else
-                funPanel.hideEdge.remove(new Short(i));
+                funPanel.hideEdge.remove(Short.valueOf(i));
             return;
         }
     }

@@ -250,14 +250,17 @@ public class GameSelectPanel extends KirrkirrPanel implements ActionListener {
 
   //////////////////////////Next three methods needed to be KirrkirrPanel
 
+  @Override
   public String getTabRollover() {
         return Helper.getTranslation(SC_PLAYGAMES);
   }
 
+  @Override
   public void setCurrentWord(String g, boolean gloss, JComponent x,
                              int a, int b) {
   } //nothing
 
+  @Override
   public void tabSelected()
    {
        // ShowStartScreen();

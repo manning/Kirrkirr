@@ -8,8 +8,8 @@ import Kirrkirr.util.RelFile;
 import Kirrkirr.ui.KirrkirrButton;
 import Kirrkirr.ui.PicturePanelCallback;
 
+import javax.sound.sampled.Clip;
 import javax.swing.*;
-import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -161,11 +161,9 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
         private final JButton next;
         private final JLabel currentLabel;
         private int current = 0;
-        private AudioClip currentClip; //=null;
+        private Clip currentClip; //=null;
         private final Kirrkirr parent;
         private DictFields currentSounds;
-
-        private boolean audioCapable = true;
 
         private final JPanel dir_p;
         private final Dimension maximumSize = new Dimension(200, 1000);
@@ -194,9 +192,6 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
             this.parent = parent;
 
             Color soundPanelColor = new Color(204, 102, 0);
-
-            // Check if audio clips can be made in the current environment
-            audioCapable = RelFile.canMakeAudioClip();
 
             JPanel buttonPanel = new JPanel();
             // buttonPanel.setLayout(new FlowLayout()); [the default]
@@ -268,14 +263,13 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
 	/**
 	 * Handler for play, stop, next, and previous buttons.
 	 */
-        public void actionPerformed(ActionEvent e)
-        {
+        public void actionPerformed(ActionEvent e) {
             if (currentClip == null)
                 return;
 
 	    Object src = e.getSource();
             if (src == playAu) {
-                currentClip.play();
+                currentClip.start();
             } else if (src == stopAu) {
                 currentClip.stop();
             } else if (src == next) {
@@ -321,13 +315,11 @@ public class MediaPanel extends KirrkirrPanel implements ActionListener, Picture
             next.setEnabled(true);
             dir_p.setVisible(false);
 
-            if (currentSounds == null || currentSounds.size() == 0
-	    	|| !(audioCapable)){
+            if (currentSounds == null || currentSounds.size() == 0) {
                 playAu.setEnabled(false);
                 stopAu.setEnabled(false);
                 next.setEnabled(false);
-            }
-            else {
+            } else {
                 playAu.setEnabled(true);
                 stopAu.setEnabled(true);
                 currentClip =

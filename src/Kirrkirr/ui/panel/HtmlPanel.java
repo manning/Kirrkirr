@@ -8,13 +8,12 @@ import Kirrkirr.ui.panel.optionPanel.XslOptionPanel;
 import Kirrkirr.ui.dialog.PictureDialog;
 import Kirrkirr.util.*;
 
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 import javax.swing.text.*;
 import javax.swing.text.html.HTMLDocument;
-
-import java.applet.*;
 
 import java.awt.*;
 import java.net.*;
@@ -361,6 +360,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
      *  @param isCut true if this should be a cut operation
      *  @return how many characters were copy (0 if no selection)
      */
+    @Override
     public int copyText(boolean isCut) {
         String selected = htmlPane.getSelectedText();
         if (Dbg.CUTPASTE) {
@@ -386,6 +386,7 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
      *  with wordClicked, which calls setCurrentWord and updates
      *  all the panels.
      */
+    @Override
     public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
             URL url = e.getURL();
@@ -443,18 +444,21 @@ public class HtmlPanel extends KirrkirrPanel implements HyperlinkListener {
 
 
     private static void playAudio(String filename) {
-        if (Dbg.HTML_PANEL) Dbg.print("clicked on audio file: "+filename);
-        if (RelFile.canMakeAudioClip()) {
-            AudioClip currentClip = RelFile.makeAudioClip(filename, true);
-            if (Dbg.HTML_PANEL) Dbg.print("trying to play "+currentClip+" "+filename);
-            try { Thread.sleep(200); } catch (Exception ee) {
-                // just do nothing
+        if (Dbg.HTML_PANEL) Dbg.print("clicked on audio file: " + filename);
+        Clip currentClip = RelFile.makeAudioClip(filename, true);
+        if (Dbg.HTML_PANEL)
+            Dbg.print("trying to play " + currentClip + " " + filename);
+        try { Thread.sleep(200); } catch (Exception ee) {
+            // just do nothing
+        }
+        if (currentClip != null) {
+            currentClip.start();
+        } else {
+            if (Dbg.ERROR) {
+                Dbg.print("No audio clip available for " + filename);
             }
-            currentClip.play();
-        } else if (Dbg.ERROR)
-            Dbg.print("Couldn't make audio for "+filename);
+        }
     }
-
 
     /** Set htmlPane to a given URL, and set the default font of that URL */
     private void setHtmlPage(URL url) throws IOException {

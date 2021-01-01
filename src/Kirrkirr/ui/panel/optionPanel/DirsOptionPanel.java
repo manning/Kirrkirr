@@ -44,15 +44,15 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
     // right now change will only really take effect next time Kirrkirr is
     // started (could be extended to be more dynamic)
 
-    private JTextField liveDictField;
-    private JTextField liveTempDirField;
-    private JTextField langField;
-    private JTextField countryField;
+    private final JTextField liveDictField;
+    private final JTextField liveTempDirField;
+    private final JTextField langField;
+    private final JTextField countryField;
 
-    private JCheckBox oldNetwork;
-    private JCheckBox oldDomains;
-    private JCheckBox oneRHS;
-    private JCheckBox panelMinimized;
+    private final JCheckBox oldNetwork;
+    private final JCheckBox oldDomains;
+    private final JCheckBox oneRHS;
+    private final JCheckBox panelMinimized;
 
     public DirsOptionPanel() {
         setName(Helper.getTranslation(SC_DIRECTORIES));
@@ -158,6 +158,7 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
     }
 
 
+    @Override
     public void setup() {
         String val;
 	boolean boolval;
@@ -184,6 +185,7 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
 
     /** Called when "defaults" is pressed in KirrkirrOptionsDialog
      */
+    @Override
     public void defaults() {
         oldNetwork.setSelected(true);
         oldDomains.setSelected(false);
@@ -201,10 +203,7 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
         if (src == oldDomains) {
         } else if (src == oldNetwork) {
         } else if (src == oneRHS) {
-        	if (oneRHS.isSelected())
-        		panelMinimized.setEnabled(false);
-        	else
-        		panelMinimized.setEnabled(true);
+            panelMinimized.setEnabled( ! oneRHS.isSelected());
         } else if (src == panelMinimized) {
         } else {
             RelFile.editWriteDirectory();
@@ -216,6 +215,7 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
     }
 
 
+    @Override
     public void apply() {
         Kirrkirr.kk.changeProperty(PROP_OLDDOMAINS, oldDomains.isSelected());
         Kirrkirr.kk.changeProperty(PROP_OLDNETWORK, oldNetwork.isSelected());
@@ -228,15 +228,17 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
     }
 
 
+    @Override
     public String getToolTip() {
         return SC_DESC;
     }
 
     /** Called by profile manager, in case the options
      *  panel wants to save any state. If so, it should also
-     *  implement <code>loadState</code>.
+     *  implement {@code loadState}.
      *  @see #loadState
      */
+    @Override
     public void saveState(ObjectOutputStream oos) throws IOException{
         //is this right? what if they open it on a different computer?
         //but it would be good to save for applet folks...
@@ -245,15 +247,17 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
 
     /** Called by profile manager, in case the options
      *  panel wants to save/load state. If so, it should also
-     *  implement <code>saveState</code>.
+     *  implement {@code saveState}.
      *  @see #saveState
      */
+    @Override
     public void loadState(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         RelFile.WRITE_DIRECTORY = (String)ois.readObject();
     }
 
     /** cw 2002: inner class to listen to dictDirButton (perhaps should
-     * move tempDirButton's listener to an inner class as well)
+     * move tempDirButton's listener to an inner class as well).
+     *
      * @see DirsOptionPanel#actionPerformed(java.awt.event.ActionEvent)
      * @see Kirrkirr.util.RelFile#editWriteDirectory()
      * @see Kirrkirr#promptForNewDictionary()
@@ -261,6 +265,9 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
      */
     public class PickDictDir implements ActionListener {
 
+        // todo [cdm 2020]: Unify with 2 other ways of changing dictionary directory:
+        // namely, promptForNewDictionary in Kirrkirr.java and Kirrkirr.LoadDictDir class actionPerformed()
+        @Override
         public void actionPerformed(ActionEvent e) {
             JFileChooser fileChooser = new JFileChooser(new File(RelFile.WRITE_DIRECTORY)); // change? base dir (RelFile.codeBase)? - they actually start off the same (RelFile.Init)
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -271,6 +278,7 @@ public class DirsOptionPanel extends KirrkirrOptionPanel implements
                 // this is how promptForNewDictionary() does it, but
                 // it doesn't seem to be the best way...  Only works if subdir
                 String dictDir = fileChooser.getSelectedFile().getName();
+                // todo [FILE_REDO]: String dictDir = fileChooser.getSelectedFile().getPath();
                 Kirrkirr.kk.changeProperty("kirrkirr.dictionaryDirectory",
                                            dictDir);  // RelFile.MakeFileName??
                 // changeProperty() already saves, so unlike in

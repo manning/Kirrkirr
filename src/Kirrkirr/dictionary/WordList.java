@@ -319,7 +319,7 @@ public abstract class WordList {
      *  which match word, via plain or fuzzy search.
      */
     public void updateSelection(String query, boolean filter) {
-        if (Dbg.LIST) Dbg.print(debug+"updateselection "+query+" "+filter);
+        if (Dbg.LIST) Dbg.print(debug+"updateSelection "+query+" "+filter);
         query = query.trim();
         // quote parentheses
         query = SearchPanel.checkForParentheses(query);
@@ -338,25 +338,27 @@ public abstract class WordList {
         // a boolean for speed.
         // Else, try regex2 first, since regex1 can only match if it does
         boolean selections1Empty = true;
-        for (int i=0, sz = words.size() ; i < sz ; i++) {
-            String curword = (String) words.elementAt(i);
+        for (int i = 0, sz = words.size(); i < sz ; i++) {
+            String curword = words.elementAt(i);
             if (selections1Empty) {
                 if (regex2.hasMatch(curword)) {
                     if (Dbg.VERBOSE) Dbg.print("Matched: "+regex2.toString()+" <with> "+words.elementAt(i));
                     Object obj = Integer.valueOf(i);
-                    if (filter) obj=curword;
-                    selections2.addElement(obj);
+                    if (filter) {
+                        obj = curword;
+                    }
+                    selections2.add(obj);
                     if (regex1.hasMatch(curword)) {
-                        selections1.addElement(obj);
+                        selections1.add(obj);
                         selections1Empty = false;
                     }
                 }
             } else {
                 if (regex1.hasMatch(curword)) {
                     if (Dbg.VERBOSE) Dbg.print("Matched: "+regex1.toString()+" <with> "+words.elementAt(i));
-                    Object obj = new Integer(i);
-                    if (filter) obj=curword;
-                    selections1.addElement(obj);
+                    Object obj = Integer.valueOf(i);
+                    if (filter) obj = curword;
+                    selections1.add(obj);
                 }
             }
         }
@@ -369,7 +371,7 @@ public abstract class WordList {
             int sz = selections1.size();
             int[] indices = new int[sz];
             for (int i=0 ; i < sz; i++) {
-                indices[i] = ((Integer)selections1.elementAt(i)).intValue();
+                indices[i] = ((Integer)selections1.get(i)).intValue();
             }
             highlightInWordList(indices);
         } else { // filter case

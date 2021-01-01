@@ -129,14 +129,14 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public static final String SC_DICTERROR = "Dictionary_Error: ";
     public static final String SC_MEDIA_HEADING =
             "Step_11:_Enter_information_about_sounds_and_images";
-    public static final String SC_IN_IMAGE_FOLDER = "In \'images\' directory...";
+    public static final String SC_IN_IMAGE_FOLDER = "In 'images' directory...";
     public static final String SC_IMAGE_PATH = "Word_Images_XPath: ";
     public static final String SC_AUDIO_PATH = "Word_Audio_XPath: ";
     public static final String SC_DICT_ICON = "Dictionary_Icon: ";
     public static final String SC_GLOSS_ICON = "Gloss_Dictionary_Icon: ";
     public static final String SC_XSL_HEADING =
             "Step_12:_Enter_the_xsl_files_to_be_used_to_generate_html_entries";
-    public static final String SC_IN_XSL_FOLDER = "In \'xsl\' directory...";
+    public static final String SC_IN_XSL_FOLDER = "In 'xsl' directory...";
     public static final String SC_USE_UNDERSCORE =
             "For_internationalization,_please_use_underscores_instead_of_spaces.";
     public static final String SC_XSL_FILE = "XSL_Filename: ";
@@ -168,7 +168,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public static final String SC_NEW_DICT_DIR = "New_Dictionary_Directory: ";
     public static final String SC_NEW_DICT_FILE = "New_Dictionary_XML_Filename: ";
     public static final String SC_NEW_SPEC_FILE = "New_Dictionary_Spec_Filename: ";
-    public static final String SC_RUN_PREPROCESS = "Click_\'Next\'_to_begin_preprocessing...";
+    public static final String SC_RUN_PREPROCESS = "Click_'Next'_to_begin_preprocessing...";
 
     public static final String SC_DICT_FILES_HEADING = "Step_14:_Final_processing!";
     public static final String SC_DICT_FILES_DESC =
@@ -176,7 +176,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public static final String SC_FORWARD_INDEX = "Forward_index_file: ";
     public static final String SC_REVERSE_INDEX = "Reverse_index_file: ";
     public static final String SC_DOMAIN_FILE = "Domain_file";
-    public static final String SC_RUN_PROCESS = "Click_\'Next\'_to_begin_processing...";
+    public static final String SC_RUN_PROCESS = "Click_'Next'_to_begin_processing...";
 
     public static final String SC_FINAL_HEADING = "Dictionary_preparation_completed!";
     public static final String SC_LOAD_NEW_DICT = " Load_new_dictionary_now ";
@@ -192,12 +192,12 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
 
     private JPanel currPage;
 
-    private JPanel mainPanel;
-    private JPanel instructionsPanel;
+    private final JPanel mainPanel;
+    private final JPanel instructionsPanel;
 
-    private HashMap tagNames;
-    private HashMap subTags;
-    private Vector possSenseTags;
+    private final HashMap<String,Object> tagNames;
+    private final HashMap subTags;
+    private final Vector possSenseTags;
 
     private KirrkirrButton cancel;
     private KirrkirrButton previous;
@@ -287,7 +287,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     private JTextField fuzzyHwordReplacementRegex;
     private JList fuzzyHwordList;
     private DefaultListModel fuzzyHwordListModel;
-    private Hashtable fuzzyHwordTable;
+    private Hashtable<String,String> fuzzyHwordTable;
     private KirrkirrButton addFuzzyHword, deleteFuzzyHword, editFuzzyHword;
     private JTextField fuzzyGlossOrigRegex;
     private JTextField fuzzyGlossReplacementRegex;
@@ -358,7 +358,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     private JPanel finalPanel;
     private JCheckBox loadNewDict;
 
-    private Object[] theNames;
+    private String[] theNames;
 
     /** A set of reasons (as text strings) why the dictionary needs
      *  to be preprocessed
@@ -389,7 +389,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         setSize(minimumSize);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        tagNames = new HashMap();
+        tagNames = new HashMap<String,Object>();
         subTags = new HashMap();
         possSenseTags = new Vector();
         //newSpecs = (new DOMImplementationImpl()).createDocument(null,
@@ -456,10 +456,10 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         int len = path.length();
         for (int i = 0; i < len; i++) {
             char curr = path.charAt(i);
-            if (!Character.isLetterOrDigit(curr) && !Character.isWhitespace(curr)
-                    && ((new Character(curr)).compareTo(new Character('/')) != 0)
-                    && ((new Character(curr)).compareTo(new Character('@')) != 0))
+            if ( ! Character.isLetterOrDigit(curr) && ! Character.isWhitespace(curr)
+                    && curr != '/' && curr != '@') {
                 return false;
+            }
         }
         return true;
     }
@@ -485,7 +485,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                             null, null, false, useAttr, useCustom, names);
         } else {
             if (isSinglePath(old)) {
-                int atIndex = old.indexOf("@");
+                int atIndex = old.indexOf('@');
                 if (atIndex < 0) {
                     panel = new SpecEntryPanel(Helper.getTranslation(name),
                                     old, null, false, useAttr, useCustom, names);
@@ -524,7 +524,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                             0, Helper.getTranslation(subName), null, null, hasSubtags, centered);
         } else {
             String entryPath, attr;
-            int atIndex = old.indexOf("@");
+            int atIndex = old.indexOf('@');
             if (!isSinglePath(old) || atIndex < 0) {
                 entryPath = old;
                 attr = null;
@@ -548,7 +548,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                         subPath = null;
                         subAttr = null;
                     } else {
-                        atIndex = sub.indexOf("@");
+                        atIndex = sub.indexOf('@');
                         if (atIndex < 0) {
                             subPath = sub;
                             subAttr = null;
@@ -625,7 +625,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public void addLabel(JPanel parent, String text, boolean centered) {
         addLabel(parent, text, centered, false);
     }
-    public void addLabel(JPanel parent, String text, boolean centered, boolean red) {
+    public static void addLabel(JPanel parent, String text, boolean centered, boolean red) {
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
         if (centered)
@@ -642,7 +642,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             labelPanel.add(Box.createHorizontalGlue());
     }
 
-    public void addSpecLister(JPanel parent, KirrkirrButton add, KirrkirrButton edit,
+    public static void addSpecLister(JPanel parent, KirrkirrButton add, KirrkirrButton edit,
                               KirrkirrButton delete, JList list) {
 
         JPanel panel = new JPanel();
@@ -686,7 +686,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         basicInfoPanel = new JPanel();
         basicInfoPanel.setLayout(new BoxLayout(basicInfoPanel, BoxLayout.PAGE_AXIS));
         //basicInfoPanel.setLayout(new SpringLayout());
-        theNames = (tagNames.keySet().toArray());
+        theNames = (tagNames.keySet().toArray(new String[0]));
         Arrays.sort(theNames);
 
         basicInfoPanel.add(Box.createVerticalStrut(5));
@@ -776,7 +776,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                                 null, null, false, true, true);
             else {
                 if (isSinglePath(old)) {
-                    int atIndex = old.indexOf("@");
+                    int atIndex = old.indexOf('@');
                     if (atIndex < 0)
                         subEntryXPath =
                                 new SpecEntryPanel(Helper.getTranslation(SC_SUBENTRY_ATTR),
@@ -1155,10 +1155,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         fuzzyHwordTable = new Hashtable();
         if (oldSpecs != null) {
             Regex[] oldFuzzyHwords = oldSpecs.getHeadwordLanguageSubs();
-            for (int i = 0; i < oldFuzzyHwords.length; i++)
-            {
-                String pattern = ((OroRegex)oldFuzzyHwords[i]).getOriginalPattern();
-                String sub = ((OroRegex)oldFuzzyHwords[i]).getOriginalSub();
+            for (Regex oldFuzzyHword : oldFuzzyHwords) {
+                String pattern = ((OroRegex) oldFuzzyHword).getOriginalPattern();
+                String sub = ((OroRegex) oldFuzzyHword).getOriginalSub();
                 fuzzyHwordListModel.addElement(pattern);
                 fuzzyHwordTable.put(pattern, sub);
             }
@@ -1182,10 +1181,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         fuzzyGlossTable = new Hashtable();
         if (oldSpecs != null) {
             Regex[] oldFuzzyGloss = oldSpecs.getGlossLanguageSubs();
-            for (int i = 0; i < oldFuzzyGloss.length; i++)
-            {
-                String pattern = ((OroRegex)oldFuzzyGloss[i]).getOriginalPattern();
-                String sub = ((OroRegex)oldFuzzyGloss[i]).getOriginalSub();
+            for (Regex fuzzyGloss : oldFuzzyGloss) {
+                String pattern = ((OroRegex) fuzzyGloss).getOriginalPattern();
+                String sub = ((OroRegex) fuzzyGloss).getOriginalSub();
                 fuzzyGlossListModel.addElement(pattern);
                 fuzzyGlossTable.put(pattern, sub);
             }
@@ -1226,8 +1224,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         stopcharListModel = new DefaultListModel();
         if (oldSpecs != null) {
             Vector stopchars = oldSpecs.getStopChars();
-            for (int i = 0; i < stopchars.size(); i++)
-            {
+            for (int i = 0; i < stopchars.size(); i++) {
                 String character = (String)stopchars.elementAt(i);
                 stopcharListModel.addElement(character);
             }
@@ -1241,13 +1238,12 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public void getSenseChoices() {
         String entryPath = dictEntryXPath.getText()+"/";
         possSenseTags.clear();
-        for (int i = 0; i < theNames.length; i++) {
-            String name = (String)theNames[i];
+        for (String name : theNames) {
             int eIndex = name.lastIndexOf(entryPath);
             if (eIndex != -1) {
-                eIndex+=entryPath.length();
+                eIndex += entryPath.length();
                 String end = name.substring(eIndex);
-                if (end.indexOf("/") == -1)
+                if ( ! end.contains("/"))
                     possSenseTags.add(name);
             }
         }
@@ -1507,8 +1503,8 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                  if (reasons.size() > 0)
                          readForPropFile(newDirectory.getText());
                  else {*/
-        int second = filename.lastIndexOf("\\");
-        int first = filename.lastIndexOf("\\", second-1)+1;
+        int second = filename.lastIndexOf('\\');
+        int first = filename.lastIndexOf('\\', second-1)+1;
         readForPropFile(filename.substring(first, second));
         //}
     }
@@ -1873,7 +1869,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         }
     }
 
-    private boolean notFilledWarn(JTextField tf, String msg) {
+    private static boolean notFilledWarn(JTextField tf, String msg) {
         if (notFilled(tf)) {
             JOptionPane.showMessageDialog(
                     Kirrkirr.kk.window, msg);
@@ -1964,7 +1960,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         }
     }
 
-    public void addTextElement(Document doc, String tagName, String spec) {
+    public static void addTextElement(Document doc, String tagName, String spec) {
         String newSpec = spec.trim();
         if (newSpec == null || newSpec.equals("")) return;
         try {
@@ -1979,7 +1975,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     }
 
     private String findSubElem(String xpath) {
-        String name = xpath.substring(xpath.lastIndexOf("/")+1);
+        String name = xpath.substring(xpath.lastIndexOf('/')+1);
         String subtag = xpath + "/" + name+SC_SUBELEM;
         while(tagNames.containsKey(subtag))
             subtag+=SC_EXTRASUBELEM;
@@ -1995,8 +1991,8 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         if ( ! reasons.isEmpty()) {
             return newDirectory.getText();
         } else {
-            int second = filename.lastIndexOf("\\");
-            int first = filename.lastIndexOf("\\", second-1)+1;
+            int second = filename.lastIndexOf('\\');
+            int first = filename.lastIndexOf('\\', second-1)+1;
             if (Dbg.IMPORT_WIZARD) {
                 Dbg.print("getCurrDictDir: filename is " + filename);
                 Dbg.print("getCurrDictDir: returning" + filename.substring(first, second));
@@ -2137,15 +2133,15 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
 
                     Element colorElem = doc.createElement(DictionaryInfo.LINK_COLOR);
                     Element rElem = doc.createElement(DictionaryInfo.LINK_COLOR_R);
-                    Text r = doc.createTextNode((new Integer(value.r)).toString());
+                    Text r = doc.createTextNode((Integer.valueOf(value.r)).toString());
                     rElem.appendChild(r);
                     colorElem.appendChild(rElem);
                     Element gElem = doc.createElement(DictionaryInfo.LINK_COLOR_G);
-                    Text g = doc.createTextNode((new Integer(value.g)).toString());
+                    Text g = doc.createTextNode((Integer.valueOf(value.g)).toString());
                     gElem.appendChild(g);
                     colorElem.appendChild(gElem);
                     Element bElem = doc.createElement(DictionaryInfo.LINK_COLOR_B);
-                    Text b = doc.createTextNode((new Integer(value.b)).toString());
+                    Text b = doc.createTextNode((Integer.valueOf(value.b)).toString());
                     bElem.appendChild(b);
                     colorElem.appendChild(bElem);
                     linkElem.appendChild(colorElem);
@@ -2165,7 +2161,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                         xpath = doc.createTextNode(sub);
                         String[] parse = new String[2];
                         parse[0] = parser;
-                        parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                        parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                         parseRegexps.put(value.xpath, parse);
                         if (useSense)
                             addParserForSense(value.xpath, parse);
@@ -2195,7 +2191,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 Text path = doc.createTextNode(sub);
                 String[] parse = new String[2];
                 parse[0] = parser;
-                parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                 parseRegexps.put(base, parse);
                 if (useSense)
                     addParserForSense(base, parse);
@@ -2215,7 +2211,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 Text path = doc.createTextNode(sub);
                 String[] parse = new String[2];
                 parse[0] = parser;
-                parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                 parseRegexps.put(base, parse);
                 if (useSense)
                     addParserForSense(base, parse);
@@ -2238,12 +2234,12 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 Text path = doc.createTextNode(sub);
                 String[] parse = new String[2];
                 parse[0] = parser;
-                parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                 parseRegexps.put(base, parse);
                 if (useSense)
                     addParserForSense(base, parse);
                 addTextElement(doc, DictionaryInfo.DOMAIN_COMPONENT_XPATH,
-                        sub.substring(sub.lastIndexOf("/")+1));
+                        sub.substring(sub.lastIndexOf('/')+1));
             } else {
                 String subTag = domainXPath.getSub();
                 if (subTag != null)
@@ -2272,7 +2268,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                     }
                 }
                 String entryPath = dictEntryXPath.getText();
-                int atIndex = entryPath.indexOf("@");
+                int atIndex = entryPath.indexOf('@');
                 String newSubPath;
                 if (atIndex != -1) {
                     newSubPath = entryPath.substring(0, atIndex);
@@ -2307,7 +2303,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 Text path = doc.createTextNode(sub);
                 String[] parse = new String[2];
                 parse[0] = parser;
-                parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                 parseRegexps.put(base, parse);
                 if (useSense)
                     addParserForSense(base, parse);
@@ -2327,7 +2323,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 Text path = doc.createTextNode(sub);
                 String[] parse = new String[2];
                 parse[0] = parser;
-                parse[1] = sub.substring(sub.lastIndexOf("/")+1);
+                parse[1] = sub.substring(sub.lastIndexOf('/')+1);
                 parseRegexps.put(base, parse);
                 if (useSense)
                     addParserForSense(base, parse);
@@ -2500,24 +2496,24 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     public boolean readForPropFile(String dictionaryDir) {
         File propFile = new File(dictionaryDir + "\\" + Kirrkirr.DICT_PROPERTIES_FILE);
         if (propFile.exists() && propFile.isFile()) {
-            Properties oldProps = new Properties();
 
             try {
                 BufferedInputStream bis = new BufferedInputStream(new FileInputStream(propFile));
+                Properties oldProps = new Properties();
                 PropertiesUtils.load(oldProps, bis);
                 bis.close();
 
                 String fI = oldProps.getProperty("dictionary.index");
                 if (fI != null) {
-                    forwardIndex.setText(fI.substring(0, fI.lastIndexOf(".")));
+                    forwardIndex.setText(fI.substring(0, fI.lastIndexOf('.')));
                 }
                 String rI = oldProps.getProperty("dictionary.reverseIndex");
                 if (rI != null) {
-                    reverseIndex.setText(rI.substring(0, rI.lastIndexOf(".")));
+                    reverseIndex.setText(rI.substring(0, rI.lastIndexOf('.')));
                 }
                 String dF = oldProps.getProperty("dictionary.domainFile");
                 if (dF != null) {
-                    domainFile.setText(dF.substring(0, dF.lastIndexOf(".")));
+                    domainFile.setText(dF.substring(0, dF.lastIndexOf('.')));
                 }
                 return true;
             } catch (Exception e) {
@@ -2556,11 +2552,11 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
     }
 
     private boolean fixOldPropFile() {
-        int second = filename.lastIndexOf("\\");
-        int first = filename.lastIndexOf("\\", second-1)+1;
+        int second = filename.lastIndexOf('\\');
+        int first = filename.lastIndexOf('\\', second-1)+1;
 
         File propFile = new File(filename.substring(first, second)
-                + "\\" + Kirrkirr.DICT_PROPERTIES_FILE);
+                + '\\' + Kirrkirr.DICT_PROPERTIES_FILE);
         if (Dbg.IMPORT_WIZARD) {
             Dbg.print("fixOldPropFile: filename=" + filename);
             Dbg.print("fixOldPropFile: propFile=" + propFile);
@@ -2587,7 +2583,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             if (oldProps != null) {
                 dict = oldProps.getProperty("dictionary.dictionary");
             } else {
-                int ind = filename.lastIndexOf("\\");
+                int ind = filename.lastIndexOf('\\');
                 dict =  filename.substring(ind + 1);
                 Dbg.print("fixOldPropFile: dictionary file is " + dict);
             }
@@ -2619,18 +2615,19 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         return true;  //tests were attempted
     }
 
-    /** Actually make auxiliary files based on user's requests.
+    /*Actually make auxiliary files based on user's requests.
      *  Note that this is done on a background thread.
      */
 
     /** The extension should include the period! */
-    private String addExtensionIfMissing(String file, String ext) {
+    private static String addExtensionIfMissing(String file, String ext) {
        if (file.endsWith(ext)) {
            return file;
        }
        return file + ext;
     }
 
+    @Override
     public void run() {
         String dictionaryDir;
         String xmlDictionaryFile;
@@ -2638,8 +2635,8 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         String xs = ".xml";
         String clk = ".clk";
         if (reasons.isEmpty()) {
-            int second = filename.lastIndexOf("\\");
-            int first = filename.lastIndexOf("\\", second-1)+1;
+            int second = filename.lastIndexOf('\\');
+            int first = filename.lastIndexOf('\\', second-1)+1;
             dictionaryDir = filename.substring(first, second) + "\\";
             xmlDictionaryFile = dictionaryDir + filename.substring(second + 1);
             xmlSpecFile = dictionaryDir + addExtensionIfMissing(newSpecFile.getText(), xs);
@@ -2673,15 +2670,15 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             if ( ! reasons.isEmpty()) {
                 if (makeNewPropFile()) {
                     File newDir = new File(dictionaryDir);
-                    int second = filename.lastIndexOf("\\");
-                    int first = filename.lastIndexOf("\\", second-1)+1;
+                    int second = filename.lastIndexOf('\\');
+                    int first = filename.lastIndexOf('\\', second-1)+1;
 
                     File oldDir = new File(filename.substring(first, second));
                     File[] children = oldDir.listFiles();
-                    for (int i = 0; i < children.length; i++) {
-                        File curr = children[i];
-                        if (curr.isDirectory())
+                    for (File curr : children) {
+                        if (curr.isDirectory()) {
                             Helper.copyDirectory(curr, newDir.getName());
+                        }
                     }
                 } else {
                     JOptionPane.showMessageDialog(
@@ -2741,7 +2738,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 JOptionPane.showMessageDialog(
                         Kirrkirr.kk.window, "Please enter a " +
                         Helper.getTranslation(
-                                SC_SEARCH_NAME.substring(0, SC_SEARCH_NAME.indexOf(":"))) + ".");
+                                SC_SEARCH_NAME.substring(0, SC_SEARCH_NAME.indexOf(':'))) + ".");
                 return;
             }
             String regex = searchRegex.getText();
@@ -2749,7 +2746,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 JOptionPane.showMessageDialog(
                         Kirrkirr.kk.window, "Please enter a " +
                         Helper.getTranslation(
-                                SC_SEARCH_REGEX.substring(0, SC_SEARCH_REGEX.indexOf(":"))) + ".");
+                                SC_SEARCH_REGEX.substring(0, SC_SEARCH_REGEX.indexOf(':'))) + ".");
                 return;
             }
             if (searchRegexListModel.indexOf(name) == -1)
@@ -2943,9 +2940,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             linkName.setText(name);
             Link selected = (Link)linkTable.get(name);
             linkXPath.setPath(selected.xpath, selected.sub, selected.subType);
-            linkRed.setText((new Integer(selected.r)).toString());
-            linkGreen.setText((new Integer(selected.g)).toString());
-            linkBlue.setText((new Integer(selected.b)).toString());
+            linkRed.setText((Integer.valueOf(selected.r)).toString());
+            linkGreen.setText((Integer.valueOf(selected.g)).toString());
+            linkBlue.setText((Integer.valueOf(selected.b)).toString());
         } else if (src == deleteLink) {
             String name = (String)linkList.getSelectedValue();
             if (name == null) return;
@@ -3043,9 +3040,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             }
             Color newColor = JColorChooser.showDialog(
                                 this, "Choose Link Color", startColor);
-            linkRed.setText((new Integer(newColor.getRed())).toString());
-            linkGreen.setText((new Integer(newColor.getGreen())).toString());
-            linkBlue.setText((new Integer(newColor.getBlue())).toString());
+            linkRed.setText((Integer.valueOf(newColor.getRed())).toString());
+            linkGreen.setText((Integer.valueOf(newColor.getGreen())).toString());
+            linkBlue.setText((Integer.valueOf(newColor.getBlue())).toString());
         } else if (src == mainColorChooser) {
             Color startColor;
             try {
@@ -3059,9 +3056,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             }
             Color newColor = JColorChooser.showDialog(
                                 this, "Choose Link Color", startColor);
-            mainLinkRed.setText((new Integer(newColor.getRed())).toString());
-            mainLinkGreen.setText((new Integer(newColor.getGreen())).toString());
-            mainLinkBlue.setText((new Integer(newColor.getBlue())).toString());
+            mainLinkRed.setText((Integer.valueOf(newColor.getRed())).toString());
+            mainLinkGreen.setText((Integer.valueOf(newColor.getGreen())).toString());
+            mainLinkBlue.setText((Integer.valueOf(newColor.getBlue())).toString());
         } else if (src == subColorChooser) {
             Color startColor;
             try {
@@ -3075,9 +3072,9 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             }
             Color newColor = JColorChooser.showDialog(
                                  this, "Choose Link Color", startColor);
-            subLinkRed.setText((new Integer(newColor.getRed())).toString());
-            subLinkGreen.setText((new Integer(newColor.getGreen())).toString());
-            subLinkBlue.setText((new Integer(newColor.getBlue())).toString());
+            subLinkRed.setText((Integer.valueOf(newColor.getRed())).toString());
+            subLinkGreen.setText((Integer.valueOf(newColor.getGreen())).toString());
+            subLinkBlue.setText((Integer.valueOf(newColor.getBlue())).toString());
         } else if (src == subIsSeparate) {
             CardLayout cl = (CardLayout)(subCardsPanel.getLayout());
             cl.show(subCardsPanel, Helper.getTranslation(SC_SUBENTRY_ATTR));
@@ -3427,7 +3424,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 return;
             }
             if (isSinglePath(path)) {
-                int atIndex = path.indexOf("@");
+                int atIndex = path.indexOf('@');
                 if ((atIndex < 0) && (Arrays.binarySearch(theNames,	path) >= 0)) {
                     dictTagComboBox.setSelectedItem(path);
                     //attrPanel.setVisible(false);
@@ -3776,10 +3773,10 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
 
         public String getFullPath() {
             if (usingAttr.isSelected()) {
-                return (parent + "/" + (String)(dictTagComboBox.getSelectedItem()) +
-                        "/@" + (String)attribute.getSelectedItem());
+                return (parent + "/" + dictTagComboBox.getSelectedItem() +
+                        "/@" + attribute.getSelectedItem());
             } else {
-                return parent + "/" + (String)(dictTagComboBox.getSelectedItem());
+                return parent + "/" + dictTagComboBox.getSelectedItem();
             }
         }
 
@@ -3793,7 +3790,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
             }
             if (usingAttr.isSelected()) {
                 String attr = (String)attribute.getSelectedItem();
-                if (attr == null || attr.equals(""))
+                if (attr == null || attr.isEmpty())
                     JOptionPane.showMessageDialog(
                             Kirrkirr.kk.window,
                             "Please enter a attribute name for the " +
@@ -4067,14 +4064,14 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
                 } else {
                     if (hasSubtag)
                         subComponentsType.insertItemAt(
-                                new String(Helper.getTranslation(SC_WITH_TAG)), 1);
+                                Helper.getTranslation(SC_WITH_TAG), 1);
                     //subComponentsType.setEnabled(true);
                 }
             }
         }
     }
 
-    private class Link {
+    private static class Link {
         public String name;
         public String xpath;
         public String sub;
@@ -4092,7 +4089,7 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         }
     }
 
-    private class XslFile {
+    private static class XslFile {
         public String filename;
         public String shortName;
         public String description;
@@ -4104,8 +4101,8 @@ public class ImportDialog extends JDialog implements ActionListener, Runnable {
         }
     }
 
-    static class ProcessProgressDialog extends JDialog implements IndexMakerTracker
-    {
+    private static class ProcessProgressDialog extends JDialog implements IndexMakerTracker {
+
         private boolean doDict; //whether each type of file
         //is being built
         private boolean doneDispose; //=false;

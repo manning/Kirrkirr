@@ -19,13 +19,13 @@ import javax.swing.*;
 public class AuxFilePanel extends JPanel implements ActionListener {
 
     private static final String SC_BROWSE = "Browse...";
-    private JLabel fileTypeLabel; //what file to enter
-    private JTextField fileTextBox; //where to enter files
-    private KirrkirrButton browse; //a button to find files
-    private short extType; //type of file extension - see KirrkirrFileFilter
+    private final JLabel fileTypeLabel; //what file to enter
+    private final JTextField fileTextBox; //where to enter files
+    private final KirrkirrButton browse; //a button to find files
+    private final short extType; //type of file extension - see KirrkirrFileFilter
     private String innerFolder;
-    private boolean shortForm;
-    private FileFilter fFilter;
+    private final boolean shortForm;
+    private final FileFilter fFilter;
     
     public AuxFilePanel(String fileType, short fileExtType) {
     	this(fileType, fileExtType, false);
@@ -73,6 +73,7 @@ public class AuxFilePanel extends JPanel implements ActionListener {
     }
 
     //set all contained components to our enabled status
+    @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         fileTypeLabel.setEnabled(enabled);
@@ -88,12 +89,13 @@ public class AuxFilePanel extends JPanel implements ActionListener {
      * is relevant.  We pop up a file chooser with the appropriate
      * file filter to help the user find a suitable file.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == browse) {
             //open up a file chooser dialog
             JFileChooser chooser;
-            if (innerFolder.equals("")) {
+            if (innerFolder.isEmpty()) {
                 chooser = new JFileChooser(RelFile.dictionaryDir);
             } else {
                 chooser = new JFileChooser(RelFile.dictionaryDir +
@@ -105,7 +107,7 @@ public class AuxFilePanel extends JPanel implements ActionListener {
             chooser.setFileFilter(filter);
             int returnVal = chooser.showOpenDialog(this);
 
-            //if a file is chosen
+            // if a file is chosen
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 //fill in text field with chosen file name
                 File fi = chooser.getSelectedFile();
@@ -121,8 +123,8 @@ public class AuxFilePanel extends JPanel implements ActionListener {
         }
     }
 
-    //since we encapsulate a text field, provide an accessor so that
-    //the dialog can run tests using our input
+    // since we encapsulate a text field, provide an accessor so that
+    // the dialog can run tests using our input
     public String getText() { return fileTextBox.getText(); }
     
     public void setText(String text) { fileTextBox.setText(text); }

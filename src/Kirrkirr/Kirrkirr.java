@@ -15,14 +15,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.datatransfer.*;
 import java.util.*;
-import java.net.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
-
-// added by Jessica Halida
-// the following library is added to support the new help button
-import javax.help.*;
 
 
 /** Kirrkirr is an interactive multimedia browsing
@@ -174,6 +169,9 @@ public class Kirrkirr extends JPanel
     /** macintosh classic extended look and feel class name */
     public static final String MACINTOSH_LOOK_AND_FEEL="it.unitn.ing.swing.plaf.macos.MacOSLookAndFeel";
 
+    /** A rough categorization of screen sizes. Really an enum defined in KirrkirrPanel. */
+    public int kirrkirrSize = KirrkirrPanel.NORMAL;
+
     //for the tabbed panes
     public static final int TOPPANE = 0;
     public static final int BOTPANE = 1;
@@ -213,8 +211,7 @@ public class Kirrkirr extends JPanel
     //  Global variables
     /////
     public static boolean APPLET; // = false;
-    public static KirrkirrApplet demo;
-    private static Dimension screenSize;
+    private final Dimension screenSize;
 
     public static DictionaryInfo dictInfo;
 
@@ -329,7 +326,7 @@ public class Kirrkirr extends JPanel
     private static final int REGULARHEIGHT = 600;
     private static final int REGULARWIDTH = 800;
     private static final int REGULARMACWIDTH = 1024;
-    private static final int LARGE_HEIGHT = 1024;
+    private static final int LARGE_HEIGHT = 900;
     private static final int HUGE_WIDTH = 1600;
     // you seem to have to delete this much height on Windows.  Really.
     private static final int ALLOWHEIGHT = 80;
@@ -356,13 +353,13 @@ public class Kirrkirr extends JPanel
             // exact language/country match; it doesn't do backoff like the
             // standard version.
             String fname = "lang_" + currentLocale.getLanguage() + "_" +
-                currentLocale.getCountry() + ".properties";
+                    currentLocale.getCountry() + ".properties";
             if (Dbg.PROGRESS) Dbg.print("Loading properties " + fname);
             lang = new PropertyResourceBundle(RelFile.makeURL(fname).openConnection().getInputStream());
         } catch (IOException ioe) {
             try {
                 lang = ResourceBundle.getBundle("lang", currentLocale);
-            } catch(MissingResourceException mre) {
+            } catch (MissingResourceException mre) {
                 lang = null;
                 if (Dbg.ERROR)
                     Dbg.print("Missing lang resource, using default settings");
@@ -371,11 +368,13 @@ public class Kirrkirr extends JPanel
         progress.incrementValue();
 
         // Deal with screen sizing options
-        int kirrkirrSize = KirrkirrPanel.NORMAL;
+        kirrkirrSize = KirrkirrPanel.NORMAL;
         String interfaceSize = props.getProperty("kirrkirr.interfaceSize");
         screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dbg.print("Screen size is " + screenSize);
         if (interfaceSize != null) {
             String lcSize = interfaceSize.toUpperCase();
+            Dbg.print("interfaceSize is " + interfaceSize);
             if (lcSize.equals("TINY")) {
                 kirrkirrSize = KirrkirrPanel.TINY;
             } else if (lcSize.equals("SMALL")) {
@@ -394,10 +393,12 @@ public class Kirrkirr extends JPanel
                 kirrkirrSize = KirrkirrPanel.SMALL;
             } else if (screenSize.height >= 2000) {
                 kirrkirrSize = KirrkirrPanel.HUGE;
-            } else if (screenSize.height >= 1200) {
+            } else if (screenSize.height >= 1050) {
                 kirrkirrSize = KirrkirrPanel.LARGE;
             }
         }
+        Dbg.print("Interface size: " + kirrkirrSize + ' ' +
+                KirrkirrPanel.panelSize(kirrkirrSize));
 
         if (Helper.onMacOSX()) {
             KirrkirrButton.setInsetSize(KirrkirrButton.LARGE);
@@ -550,7 +551,6 @@ public class Kirrkirr extends JPanel
         setPreferredSize(screenSize);
         validate();
         progress.incrementValue();
-
     }
 
 
@@ -1253,7 +1253,7 @@ public class Kirrkirr extends JPanel
         if (userChoice == JFileChooser.APPROVE_OPTION) {
             String userFile = fileChooser.getSelectedFile().getName();
             // String userDir=fileChooser.getSelectedFile().getParent();
-            cache.saveAsKrr(scrollPanel.getWords(),userFile);
+            cache.saveAsKrr(scrollPanel.getWords(), userFile);
         }
     }
 
@@ -1515,11 +1515,7 @@ public class Kirrkirr extends JPanel
         // exit if the user selected YES or NO to save
         Dbg.close();
         window.dispose();
-        if (APPLET) {
-            demo.showStatus("");
-        } else {
-            System.exit(0);
-        }
+        System.exit(0);
     }
 
     /** Accessor for menu item Options|Word List|See Subwords.
@@ -1809,12 +1805,12 @@ public class Kirrkirr extends JPanel
             dictInfoFile = props.getProperty("dictionary.dictSpecFile");
             domainConverter = props.getProperty("dictionary.domainConverter");
             if ((domainConverter != null) && (!domainConverter.equalsIgnoreCase("null"))) {
-            	dc = new DomainConverter(RelFile.MakeFileName(RelFile.dictionaryDir, domainConverter));
+            	dc = new DomainConverter(RelFile.makeFileName(RelFile.dictionaryDir, domainConverter));
             	usingDomainConversion = true;
             } else {
             	usingDomainConversion = false;
             }
-            dictInfo=new DictionaryInfo(RelFile.MakeFileName(RelFile.dictionaryDir, dictInfoFile));
+            dictInfo=new DictionaryInfo(RelFile.makeFileName(RelFile.dictionaryDir, dictInfoFile));
             return true;
         } catch (Exception e) {
             if (Dbg.ERROR) {
@@ -1824,7 +1820,7 @@ public class Kirrkirr extends JPanel
             if (dictInfoFile == null) dictInfoFile = "";
             JOptionPane.showMessageDialog(null,
                     Helper.getTranslation(SC_NO_DICTINFO) + "\n" +
-                      RelFile.MakeFileName(RelFile.dictionaryDir, dictInfoFile) +
+                      RelFile.makeFileName(RelFile.dictionaryDir, dictInfoFile) +
                       "\nError: " + e.getMessage(),
                     Helper.getTranslation(SC_DICTINFO_ERROR),
                     JOptionPane.ERROR_MESSAGE);
@@ -1842,14 +1838,24 @@ public class Kirrkirr extends JPanel
         JFileChooser fileChooser = new JFileChooser(new File(RelFile.WRITE_DIRECTORY));
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setDialogTitle(Helper.getTranslation(SC_NEW_DICT));
-        int userChoice = fileChooser.showDialog(Kirrkirr.window, Helper.getTranslation(SC_SET_DICT));
+        // int userChoice = fileChooser.showDialog(Kirrkirr.window, Helper.getTranslation(SC_SET_DICT));
+        // If the dictionary fails to load at the beginning, there may not yet be a visible
+        // Kirrkirr frame, so instead create our own JDialog to display this prompt in
+        JDialog wrapper = new JDialog((Window) null);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension frameSize = fileChooser.getPreferredSize();
+        wrapper.setBounds((screenSize.width - frameSize.width)/2,
+                (screenSize.height - frameSize.height)/2,
+                frameSize.width, frameSize.height);
+        wrapper.setVisible(true);
+        int userChoice = fileChooser.showDialog(wrapper, Helper.getTranslation(SC_SET_DICT));
         // Dbg.print("userChoice was " + userChoice + " [APPROVE=" +
         //        JFileChooser.APPROVE_OPTION + ", CANCEL=" +
         //        JFileChooser.CANCEL_OPTION + "]");
         if (userChoice == JFileChooser.APPROVE_OPTION) {
             String directoryDir= fileChooser.getSelectedFile().getName();
-            Dbg.print(directoryDir);
-
+            // todo [FILE_REDO]: String directoryDir = fileChooser.getSelectedFile().getPath();
+            Dbg.print("Now using dictionary in " + directoryDir);
             return readInDictionaryInfo(directoryDir, props);
         } else { // if (userChoice==JFileChooser.CANCEL_OPTION) {
             quitKirrkirr();
@@ -1919,7 +1925,7 @@ public class Kirrkirr extends JPanel
      */
     public static void main(String[] argv) {
     	args = argv;
-        RelFile.Init("");
+        RelFile.init("");
         mainInit(argv);
     }
 
@@ -1951,9 +1957,11 @@ public class Kirrkirr extends JPanel
             }
 
             WindowListener winlin = new WindowAdapter() {
+                @Override
                 public void windowClosing(WindowEvent e) {
                     quitKirrkirr();
                 }
+                @Override
                 public void windowActivated(WindowEvent e) {
                     // start any panel threads
                     for (int j = TOPPANE; j < NUMPANES; j++) {
@@ -1961,6 +1969,7 @@ public class Kirrkirr extends JPanel
                             currentTabs[j].start();
                     }
                 }
+                @Override
                 public void windowDeactivated(WindowEvent e) {
                     // stop any panel threads
                     for (int j = TOPPANE; j < NUMPANES; j++) {
@@ -2055,13 +2064,9 @@ public class Kirrkirr extends JPanel
                 Dbg.memoryUsage("at end of main()");
             }
 
-            if (APPLET) {
-                demo.showStatus(Helper.getTranslation(SC_COMPLETE));
-            }
             if (Dbg.VERBOSE) Dbg.print("hello from main");
             Thread.sleep(1200); //let the swing threads catch up
             cache.glossLoader.start();
-
 
             if (Dbg.TIMING) {
                 Dbg.endTime("Kirrkirr total startup time");
@@ -2165,10 +2170,10 @@ public class Kirrkirr extends JPanel
                     doingOkay = promptForNewDictionary();
                 }
                 if (doingOkay) {
-                    if (indexFile == null || "".equals(indexFile)) {
+                    if (indexFile == null || indexFile.isEmpty()) {
                         JOptionPane.showMessageDialog(null,
                                 Helper.getTranslation(SC_NO_DICT_INDEX) + "\n" +
-                                RelFile.MakeFileName(RelFile.dictionaryDir, indexFile),
+                                RelFile.makeFileName(RelFile.dictionaryDir, indexFile),
                                 Helper.getTranslation(SC_DICT_ERROR),
                                 JOptionPane.ERROR_MESSAGE);
                         if (Dbg.ERROR) {
@@ -2186,9 +2191,11 @@ public class Kirrkirr extends JPanel
                         cache = new DictionaryCache(indexFile, kk, htmlFolder, xmlFolder,
                               RelFile.dictionaryDir+RelFile.fileSeparator()+xslFolder);
                     } catch (IOException ioe) {
+                        cache = null;
+                        dictInfo = null;
                         JOptionPane.showMessageDialog(null,
                                 Helper.getTranslation(SC_NO_DICT) + "\n" +
-                                RelFile.MakeFileName(RelFile.dictionaryDir, indexFile) + "\n" +
+                                RelFile.makeFileName(RelFile.dictionaryDir, indexFile) + "\n" +
                                 ioe.toString(),
                                 Helper.getTranslation(SC_DICT_ERROR),
                                 JOptionPane.ERROR_MESSAGE);
@@ -2196,8 +2203,6 @@ public class Kirrkirr extends JPanel
                             Dbg.print("Couldn't open the dictionary!");
                             Helper.handleException(ioe);
                         }
-                        cache = null;
-                        dictInfo = null;
                     }
                 }
             } // end while (dictInfo == null || cache == null)
@@ -2260,9 +2265,6 @@ public class Kirrkirr extends JPanel
                 Dbg.memoryUsage("at end of main()");
             }
 
-            if (APPLET && ! reloading) {
-                demo.showStatus(Helper.getTranslation(SC_COMPLETE));
-            }
             if (Dbg.VERBOSE) Dbg.print("hello from main");
             Thread.sleep(1200); //let the swing threads catch up
             if (cache.glossLoader != null) {
@@ -2289,6 +2291,7 @@ public class Kirrkirr extends JPanel
     }
 
 
+    /** Used to load a new different directory from the File menu. */
     public class LoadDictDir implements ActionListener, Runnable {
 
     	private String dictDir;
@@ -2304,6 +2307,8 @@ public class Kirrkirr extends JPanel
                 // this is how promptForNewDictionary() does it, but
                 // it doesn't seem to be the best way...  Only works if subdir
                 dictDir = fileChooser.getSelectedFile().getName();
+                // todo [FILE_REDO]: dictDir = fileChooser.getSelectedFile().getPath();
+                Dbg.print("New dictDir from path is: " + fileChooser.getSelectedFile().getPath());
 
                 Thread loader = new Thread(this);
                 loader.start();
@@ -2356,8 +2361,7 @@ public class Kirrkirr extends JPanel
 
                 PropertiesUtils.changeProperty(props,
                         RelFile.MakeWriteFileName(null, PROPERTIES_FILE),
-					"kirrkirr.dictionaryDirectory",
-			     dictDir);
+					"kirrkirr.dictionaryDirectory", dictDir);
                 if (Dbg.VERBOSE) Dbg.print(
                         "Properties: changed kirrkirr.dictionaryDirectory to "
 			                        + dictDir);
@@ -2370,7 +2374,7 @@ public class Kirrkirr extends JPanel
             // exit if the user selected YES or NO to save
             Dbg.close();
             window.dispose();
-            RelFile.Init("");
+            RelFile.init("");
             // mainInit(args, true);
             reload(args);
         }

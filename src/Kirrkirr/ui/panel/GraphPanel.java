@@ -151,7 +151,7 @@ public class GraphPanel extends KirrkirrPanel {
         if(toStop != null && toStop.length >0) {
             ((FFFPanel)((JPanel)toStop[0]).getComponent(0)).stop();
         }
-        zplane.add(newPanel, new Integer(highLayer+1));
+        zplane.add(newPanel, Integer.valueOf(highLayer + 1));
 
         if(Dbg.NEWFUN) Dbg.print("Adding layer at " + (highLayer+1));
         deleteIfNecessary();
@@ -368,6 +368,7 @@ public class GraphPanel extends KirrkirrPanel {
 
 
     // needed to extend KirrkirrPanel
+    @Override
     public String getTabRollover() {
         return Helper.getTranslation(SC_GRAPH_ROLLOVER);
     }
@@ -381,9 +382,10 @@ public class GraphPanel extends KirrkirrPanel {
     // if the selected word can be placed in a panel, creating that panel
     // if necessary. Then, the funmodel is obtained and the node is
     // obtained, triggering the drawing of the word.
+    @Override
     public void setCurrentWord(/* padded */ String uniqueKey, boolean gloss,
-                        final JComponent signaller, final int signallerType,
-                        final int arg)
+                                            final JComponent signaller, final int signallerType,
+                                            final int arg)
     {
         if(gloss) return;
         if(zplane.getComponentCount()==0) addView();
@@ -402,6 +404,7 @@ public class GraphPanel extends KirrkirrPanel {
      *  to disable or enable certain features.
      *  @param toGloss true when the scroll list was switched to gloss
      */
+    @Override
     public void scrollPanelChanged(boolean toGloss) {
     }
 
@@ -414,6 +417,7 @@ public class GraphPanel extends KirrkirrPanel {
     }
 
     // this function instantiates and returns the network option panel
+    @Override
     public KirrkirrOptionPanel getOptionPanel() {
          optionPanel = new FunPanelOptionPanel(parent, this);
          return optionPanel;
@@ -421,6 +425,7 @@ public class GraphPanel extends KirrkirrPanel {
 
 
     // eventually remove this and take it out of Kirrkirr.java
+    @Override
     public void start() {
         if(zplane == null) return;
         Component[] comps = zplane.getComponents();
@@ -428,6 +433,7 @@ public class GraphPanel extends KirrkirrPanel {
             ((FFFPanel)((JPanel) comps[i]).getComponent(0)).start();
         }
     }
+    @Override
     public void stop() {
         if(zplane == null) return;
         Component[] comps = zplane.getComponents();
