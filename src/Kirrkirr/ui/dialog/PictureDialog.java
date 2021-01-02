@@ -14,7 +14,7 @@ import java.awt.event.*;
 
 public class PictureDialog extends JFrame implements ActionListener {
 
-    private static final String SC_CLOSE="Close";
+    private static final String SC_CLOSE = "Close";
 
     private final int MAX_WIDTH;
     private final int MAX_HEIGHT;

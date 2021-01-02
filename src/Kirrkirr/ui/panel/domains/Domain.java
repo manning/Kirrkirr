@@ -188,7 +188,7 @@ public class Domain {
     //  gives semantic domains precedent over words
     public Domain randomChildDomainPri() {
         if (haveChildren()) {
-            ArrayList<Domain> domains = new ArrayList<Domain>();
+            ArrayList<Domain> domains = new ArrayList<>();
             for (Domain child : children) {
                 List<Domain> grandkids = child.getChildren();
                 if (grandkids != null && !grandkids.isEmpty()) {
@@ -212,7 +212,7 @@ public class Domain {
 
         //search through visible domains
 
-        for (int i=nChildren-1;i>=childCutoffIndex;i--){
+        for (int i=nChildren-1; i>=childCutoffIndex; i--) {
             Domain target = children.get(i);
             if (target.contains(scrXClick,scrYClick))
                 return target;
@@ -322,7 +322,7 @@ public class Domain {
             child.addGravity((n-childCutoffIndex)/20);
 
             //repel from other nodes
-            for (int k=j-1;k>=childCutoffIndex;k--) {
+            for (int k=j-1; k>=childCutoffIndex; k--) {
                 child.repel((Domain) children.get(k),
                         strongRepel);
             }
@@ -386,7 +386,7 @@ public class Domain {
      * direction; if false, rotation is clockwise.
      */
     private void rotate(float rad, boolean ccw) {
-        if(!ccw) rad = -rad;
+        if (!ccw) rad = -rad;
 
         //perform the rotation
         float dcx = relX - REL_CNTR_X;

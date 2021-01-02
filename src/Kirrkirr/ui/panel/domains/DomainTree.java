@@ -63,7 +63,7 @@ public class DomainTree extends JComponent implements Runnable {
 
     private NewSemanticPanel nsp;
 
-    private Vector trackers; // related to PositionTracker
+    private Vector<PositionTracker> trackers; // related to PositionTracker
     final DefaultListModel hierarchy, children;  // used in PositionTracker
 
     private int mouseX, mouseY; // position of mouse in display
@@ -107,7 +107,7 @@ public class DomainTree extends JComponent implements Runnable {
 
     public DomainTree() {
         // oldRoots = new Vector();
-        trackers = new Vector();
+        trackers = new Vector<>();
 
         // int width = parent.getWidth();
         // if (width > 2000) { width = 2000; }
@@ -296,13 +296,13 @@ public class DomainTree extends JComponent implements Runnable {
             nsp.selectedWordChanged(Helper.printableStringToUniqueKey(word.getText()));
             nsp.setSense(word);
         }
-        for (int i = 0, tsize = trackers.size(); i < tsize; i++) {
-            ((PositionTracker)trackers.elementAt(i)).repaint();
+        for (PositionTracker tracker : trackers) {
+            tracker.repaint();
         }
     }
 
     private void beginZoomStage() {
-        Domain tempTarget = (Domain) zoomQueue.elementAt(0);
+        Domain tempTarget = zoomQueue.elementAt(0);
         if (tempTarget.isWord()) {
             //don't zoom
             zooming = false;
@@ -421,8 +421,8 @@ public class DomainTree extends JComponent implements Runnable {
 
     //notify of new root
     private void notifyTrackers() {
-        for(int i = 0; i < trackers.size(); i++) {
-            ((PositionTracker) trackers.elementAt(i)).updateTracker();
+        for (PositionTracker tracker : trackers) {
+            tracker.updateTracker();
         }
     }
 
@@ -436,8 +436,8 @@ public class DomainTree extends JComponent implements Runnable {
 
         populateChildren(target);
 
-        for (int i = 0; i < trackers.size(); i++) {
-            ((PositionTracker)trackers.elementAt(i)).updateTracker();
+        for (PositionTracker tracker : trackers) {
+            tracker.updateTracker();
         }
     }
 
